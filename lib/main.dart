@@ -1,5 +1,5 @@
 import 'package:flutter/material.dart';
-
+import 'route_page.dart';
 void main() {
   runApp(const MyApp());
 }
@@ -29,7 +29,8 @@ class MyHomePage extends StatefulWidget {
 class _MyHomePageState extends State<MyHomePage> {
   int _selectedIndex = 0;
   static const _pages = [
-    Text("Routes"),
+    //Text("Routes"),
+    RoutePage(BusList:[["1A","本部线"],["1B","本部线"],["2","新联线"],["3","逸夫线"]]),
     Text("EAT"),
     Text("Search"),
     Text("Others"),
