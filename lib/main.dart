@@ -34,8 +34,8 @@ class _MyHomePageState extends State<MyHomePage> {
   int? now;
 
   int _selectedIndex = 0;
-  static const List<String> _pages = [
-    "Routes",
+  static const List<String> _pages = [//This is causing trouble for route page implementation 
+    "Routes",                         //Yu's route page implmentation use a constructor which is unusable in this case
     "EAT",
     "Search",
     "Others",
