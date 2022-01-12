@@ -1,5 +1,8 @@
 import 'package:flutter/material.dart';
+
 import 'route_page.dart';
+import 'dart:async';
+
 void main() {
   runApp(const MyApp());
 }
@@ -27,13 +30,15 @@ class MyHomePage extends StatefulWidget {
 }
 
 class _MyHomePageState extends State<MyHomePage> {
+  // TODO: replace this with actual bus data to be passed to each page
+  int? now;
+
   int _selectedIndex = 0;
-  static const _pages = [
-    //Text("Routes"),
-    RoutePage(BusList:[["1A","本部线"],["1B","本部线"],["2","新联线"],["3","逸夫线"]]),
-    Text("EAT"),
-    Text("Search"),
-    Text("Others"),
+  static const List<String> _pages = [
+    "Routes",
+    "EAT",
+    "Search",
+    "Others",
   ];
   static const _bottomNavItems = [
     BottomNavigationBarItem(
@@ -61,6 +66,19 @@ class _MyHomePageState extends State<MyHomePage> {
   }
 
   @override
+  void initState() {
+    super.initState();
+    // Periodically get bus information from server
+    // TODO: currently use time here for testing
+    Timer.periodic(const Duration(seconds: 1), (timer) {
+      int now = DateTime.now().second;
+      setState(() {
+        this.now = now;
+      });
+    });
+  }
+
+  @override
   Widget build(BuildContext context) {
     return Scaffold(
       // TODO: change app bar based on bottom nav
@@ -70,7 +88,11 @@ class _MyHomePageState extends State<MyHomePage> {
       body: Center(
           child: IndexedStack(
         index: _selectedIndex,
-        children: _pages,
+        // TODO: Construct pages
+        children: [
+          for (var t in _pages)
+            Text("$t ${now == null ? 'time not available' : now.toString()}")
+        ],
       )),
       bottomNavigationBar: BottomNavigationBar(
         items: _bottomNavItems,
