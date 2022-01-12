@@ -35,8 +35,8 @@ class _MyHomePageState extends State<MyHomePage> {
   var ListOfAllBus=[['1A','本部线'],['1B','本部线'],['2','新联线']];
 
   int _selectedIndex = 0;
-  static const List<String> _pages = [//This is causing trouble for route page implementation 
-    "Routes",                         //Yu's route page implmentation use a constructor which is unusable in this case
+  static const List<String> _pages = [//This is will get changed later
+   // "Routes",  //Commented out to make space for the RoutePage widget                      
     "EAT",
     "Search",
     "Others",
