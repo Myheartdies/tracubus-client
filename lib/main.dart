@@ -32,6 +32,7 @@ class MyHomePage extends StatefulWidget {
 class _MyHomePageState extends State<MyHomePage> {
   // TODO: replace this with actual bus data to be passed to each page
   int? now;
+  var ListOfAllBus=[['1A','本部线'],['1B','本部线'],['2','新联线']];
 
   int _selectedIndex = 0;
   static const List<String> _pages = [//This is causing trouble for route page implementation 
@@ -90,6 +91,7 @@ class _MyHomePageState extends State<MyHomePage> {
         index: _selectedIndex,
         // TODO: Construct pages
         children: [
+          RoutePage(BusList: ListOfAllBus),
           for (var t in _pages)
             Text("$t ${now == null ? 'time not available' : now.toString()}")
         ],
