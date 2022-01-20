@@ -87,10 +87,6 @@ class _MyHomePageState extends State<MyHomePage> {
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      // TODO: change app bar based on bottom nav
-      appBar: AppBar(
-        title: const Text('Tracubus'),
-      ),
       body: Center(
           child: IndexedStack(
         index: _selectedIndex,
