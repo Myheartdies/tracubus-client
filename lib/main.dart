@@ -30,22 +30,10 @@ class MyHomePage extends StatefulWidget {
 }
 
 class _MyHomePageState extends State<MyHomePage> {
-  // TODO: replace this with actual bus data to be passed to each page
-  int? now;
-  var ListOfAllBus = [
-    ['1A', '本部线'],
-    ['1B', '本部线'],
-    ['2', '新联线']
-  ];
+  // Data fetched at app launch
+  List<Map>? routes;
 
   int _selectedIndex = 0;
-  static const List<String> _pages = [
-    //This is will get changed later
-    // "Routes",  //Commented out to make space for the RoutePage widget
-    "EAT",
-    "Search",
-    "Others",
-  ];
   static const _bottomNavItems = [
     BottomNavigationBarItem(
       icon: Icon(Icons.home),
@@ -74,13 +62,25 @@ class _MyHomePageState extends State<MyHomePage> {
   @override
   void initState() {
     super.initState();
-    // Periodically get bus information from server
-    // TODO: currently use time here for testing
-    Timer.periodic(const Duration(seconds: 1), (timer) {
-      int now = DateTime.now().second;
+    // Initialize data here
+    fetchRoutes().then((v) {
       setState(() {
-        this.now = now;
+        routes = v;
       });
+    });
+    // fetchSomeData().then();
+
+    // TODO: Periodically get bus location from server
+    // Timer.periodic(duration, (timer) { });
+  }
+
+  Future<List<Map>> fetchRoutes() async {
+    // TODO:
+    return Future.delayed(const Duration(seconds: 5), () {
+      return [
+        {'id': '1A', 'name': 'Main Campus'},
+        {'id': '3', 'name': 'Shaw'}
+      ];
     });
   }
 
@@ -90,11 +90,11 @@ class _MyHomePageState extends State<MyHomePage> {
       body: Center(
           child: IndexedStack(
         index: _selectedIndex,
-        // TODO: Construct pages
         children: [
-          RoutePage(BusList: ListOfAllBus),
-          for (var t in _pages)
-            Text("$t ${now == null ? 'time not available' : now.toString()}")
+          RoutePage(routes: routes),
+          Text('test'),
+          Text('test'),
+          Text('test'),
         ],
       )),
       bottomNavigationBar: BottomNavigationBar(
