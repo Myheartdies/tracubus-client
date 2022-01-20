@@ -1,5 +1,5 @@
 import 'package:flutter/material.dart';
-import 'RouteDetail.dart';
+import 'route_detail.dart';
 class RoutePage extends StatefulWidget {
   final List BusList;
 
