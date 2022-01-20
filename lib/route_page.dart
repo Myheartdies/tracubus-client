@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import 'route_detail.dart';
+
 class RoutePage extends StatefulWidget {
   final List BusList;
 
@@ -22,21 +23,22 @@ class _RoutePageState extends State<RoutePage> {
 
   Widget _BuildList() {
     return ListView.builder(
-        itemCount: widget.BusList.length*2,
-        itemBuilder: (context, i) {
-          if (i.isOdd) return const Divider();
-          final index=i~/2;
-          return ListTile(
-              title:Text(widget.BusList[index][0]),
-              subtitle: Text(widget.BusList[index][1]),
+      itemCount: widget.BusList.length * 2,
+      itemBuilder: (context, i) {
+        if (i.isOdd) return const Divider();
+        final index = i ~/ 2;
+        return ListTile(
+            title: Text(widget.BusList[index][0]),
+            subtitle: Text(widget.BusList[index][1]),
             onTap: () {
               Navigator.push(
                 context,
-                MaterialPageRoute(builder: (context) => RouteDetail(BusNum: widget.BusList[index][0])),
+                MaterialPageRoute(
+                    builder: (context) =>
+                        RouteDetail(BusNum: widget.BusList[index][0])),
               );
-            }
-          ); /*Text(i.toString());*/
-        },
+            }); /*Text(i.toString());*/
+      },
     );
   }
 }
