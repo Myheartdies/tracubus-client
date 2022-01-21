@@ -2,7 +2,10 @@ import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
 import 'package:flutter_map/flutter_map.dart';
 import 'package:latlong2/latlong.dart';
+import 'package:flutter/cupertino.dart';
+import 'dart:convert';
 
+import 'businfo.dart';
 import 'businfo_model.dart';
 
 class RouteDetail extends StatefulWidget {
@@ -17,11 +20,39 @@ class _RouteDetailState extends State<RouteDetail> {
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-        appBar: AppBar(title: Text(widget.routeId)),
-        body: Column(crossAxisAlignment: CrossAxisAlignment.start, children: [
-          Expanded(
-            child: Consumer<BusLocationModel>(
-              builder: (context, locationModel, child) => FlutterMap(
+      appBar: AppBar(title: Text(widget.routeId)),
+      body: Consumer2<BusInfoModel, BusLocationModel>(
+        builder: (context, infoModel, locationModel, child) {
+          var _busInfo = infoModel.busInfo;
+          var stops = _busInfo?.routes[widget.routeId];
+          var routeId = widget.routeId;
+
+          Widget? map, details, hint;
+
+          // There are two cases here:
+          // 1. No error: map and details are shown;
+          // 2. Some error occured: only hint is shown.
+          if (_busInfo == null) {
+            hint = const Expanded(
+              child: Center(
+                child: Text('Route information is not available.'),
+              ),
+            );
+          } else if (stops?.isEmpty == null) {
+            hint = Expanded(
+              child: Center(
+                child: Text(
+                    'Route "$routeId" does not exist, or the route is invalid.'),
+              ),
+            );
+          } else {
+            var _busLocations = locationModel.busLocations;
+            _busLocations =
+                _busLocations?.where((e) => e.route == routeId).toList() ??
+                    const <BusLocation>[];
+
+            map = Expanded(
+              child: FlutterMap(
                 options: MapOptions(
                   bounds: LatLngBounds(
                       LatLng(22.42627619039879, 114.20044875763406),
@@ -58,28 +89,44 @@ class _RouteDetailState extends State<RouteDetail> {
                   ),
                   MarkerLayerOptions(
                     markers: [
-                      Marker(
-                        width: 80.0,
-                        height: 80.0,
-                        point: LatLng(
-                            locationModel.busLocation[widget.routeId]
-                                    ?.toDouble() ??
-                                0,
-                            -0.09),
-                        builder: (ctx) => Container(
-                          child: FlutterLogo(),
+                      for (var busLocation in _busLocations)
+                        Marker(
+                          width: 20.0,
+                          height: 20.0,
+                          point: LatLng(
+                            busLocation.latitude,
+                            busLocation.longitude,
+                          ),
+                          builder: (ctx) => const Icon(
+                            CupertinoIcons.bus,
+                            color: Colors.blue,
+                          ),
                         ),
-                      ),
                     ],
                   ),
                 ],
               ),
-            ),
-          ),
-          // TODO: construct details page
-          Consumer<BusLocationModel>(
-              builder: (context, locationModel, child) =>
-                  Expanded(child: Text('test ${locationModel.busLocation}')))
-        ]));
+            );
+            details = Expanded(
+              child: Text(
+                _busLocations
+                    .map((e) => jsonEncode(e.toJson()))
+                    .toList()
+                    .toString(),
+              ),
+            );
+          }
+
+          return Column(
+            crossAxisAlignment: CrossAxisAlignment.start,
+            children: [
+              if (map != null) map,
+              if (details != null) details,
+              if (hint != null) hint,
+            ],
+          );
+        },
+      ),
+    );
   }
 }

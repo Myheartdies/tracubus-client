@@ -45,3 +45,38 @@ class BusInfo {
 
   Map<String, dynamic> toJson() => _$BusInfoToJson(this);
 }
+
+@JsonSerializable()
+class BusLocation {
+  BusLocation(
+    this.latitude,
+    this.longitude,
+    this.route,
+    this.speed,
+    this.stop,
+    this.timestamp,
+  );
+
+  @JsonKey(required: true)
+  double latitude;
+
+  @JsonKey(required: true)
+  double longitude;
+
+  @JsonKey(required: true)
+  String route;
+
+  @JsonKey(required: true)
+  double speed;
+
+  @JsonKey(required: true)
+  int stop;
+
+  @JsonKey(required: true)
+  int timestamp;
+
+  factory BusLocation.fromJson(Map<String, dynamic> json) =>
+      _$BusLocationFromJson(json);
+
+  Map<String, dynamic> toJson() => _$BusLocationToJson(this);
+}

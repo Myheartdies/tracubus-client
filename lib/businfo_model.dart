@@ -56,11 +56,16 @@ class BusInfoModel extends ChangeNotifier {
 }
 
 class BusLocationModel extends ChangeNotifier {
-  // TODO:
-  Map<String, int> busLocation = {'1A': 0, '2': 0};
+  List<BusLocation>? busLocations;
 
-  void updateLocation(Map<String, int> location) {
-    busLocation = location;
-    notifyListeners();
+  void updateLocation(String json) {
+    try {
+      List<dynamic> _l = jsonDecode(json);
+      busLocations = List<BusLocation>.from(
+          _l.map((busLocation) => BusLocation.fromJson(busLocation)));
+      notifyListeners();
+    } catch (e) {
+      // TODO: log the exception
+    }
   }
 }

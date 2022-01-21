@@ -1,6 +1,7 @@
 import 'dart:async';
 import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
+import 'package:flutter_client_sse/flutter_client_sse.dart';
 
 import 'route_page.dart';
 import 'businfo_model.dart';
@@ -73,15 +74,12 @@ class _MyHomePageState extends State<MyHomePage> {
     fetchRoutes();
     // fetchSomeData().then();
 
-    // TODO: Periodically get bus location from server
-    Timer.periodic(const Duration(seconds: 1), (timer) {
-      setState(() {
-        int now = DateTime.now().second;
-        Provider.of<BusLocationModel>(context, listen: false).updateLocation({
-          '1A': now,
-          '2': now,
-        });
-      });
+    const url = "http://13.251.160.105:8080/api/info-sse";
+    SSEClient.subscribeToSSE(url, "").listen((event) {
+      var data = event.data;
+      if (event.event == "bus-info" && data != null) {
+        Provider.of<BusLocationModel>(context, listen: false).updateLocation(data);
+      }
     });
   }
 
