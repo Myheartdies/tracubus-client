@@ -1,10 +1,13 @@
+import 'dart:async';
 import 'package:flutter/material.dart';
+import 'package:provider/provider.dart';
 
 import 'route_page.dart';
-import 'dart:async';
+import 'businfo_model.dart';
 
 void main() {
-  runApp(const MyApp());
+  runApp(ChangeNotifierProvider(
+      create: (context) => BusInfoModel(), child: const MyApp()));
 }
 
 class MyApp extends StatelessWidget {
@@ -71,12 +74,20 @@ class _MyHomePageState extends State<MyHomePage> {
     // fetchSomeData().then();
 
     // TODO: Periodically get bus location from server
-    // Timer.periodic(duration, (timer) { });
+    Timer.periodic(const Duration(seconds: 1), (timer) {
+      setState(() {
+        int now = DateTime.now().second;
+        Provider.of<BusInfoModel>(context, listen: false).updateLocation({
+          '1A': now,
+          '2': now,
+        });
+      });
+    });
   }
 
   Future<List<Map>> fetchRoutes() async {
     // TODO:
-    return Future.delayed(const Duration(seconds: 5), () {
+    return Future.delayed(const Duration(seconds: 2), () {
       return [
         {'id': '1A', 'name': 'Main Campus'},
         {'id': '3', 'name': 'Shaw'}
