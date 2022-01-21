@@ -6,8 +6,15 @@ import 'route_page.dart';
 import 'businfo_model.dart';
 
 void main() {
-  runApp(ChangeNotifierProvider(
-      create: (context) => BusInfoModel(), child: const MyApp()));
+  runApp(
+    MultiProvider(
+      providers: [
+        ChangeNotifierProvider(create: (context) => BusLocationModel()),
+        ChangeNotifierProvider(create: (context) => BusInfoModel()),
+      ],
+      child: const MyApp(),
+    ),
+  );
 }
 
 class MyApp extends StatelessWidget {
@@ -33,9 +40,6 @@ class MyHomePage extends StatefulWidget {
 }
 
 class _MyHomePageState extends State<MyHomePage> {
-  // Data fetched at app launch
-  List<Map>? routes;
-
   int _selectedIndex = 0;
   static const _bottomNavItems = [
     BottomNavigationBarItem(
@@ -66,18 +70,14 @@ class _MyHomePageState extends State<MyHomePage> {
   void initState() {
     super.initState();
     // Initialize data here
-    fetchRoutes().then((v) {
-      setState(() {
-        routes = v;
-      });
-    });
+    fetchRoutes();
     // fetchSomeData().then();
 
     // TODO: Periodically get bus location from server
     Timer.periodic(const Duration(seconds: 1), (timer) {
       setState(() {
         int now = DateTime.now().second;
-        Provider.of<BusInfoModel>(context, listen: false).updateLocation({
+        Provider.of<BusLocationModel>(context, listen: false).updateLocation({
           '1A': now,
           '2': now,
         });
@@ -85,13 +85,31 @@ class _MyHomePageState extends State<MyHomePage> {
     });
   }
 
-  Future<List<Map>> fetchRoutes() async {
-    // TODO:
+  Future<void> fetchRoutes() async {
+    // TODO: Fetch real data from server
     return Future.delayed(const Duration(seconds: 2), () {
-      return [
-        {'id': '1A', 'name': 'Main Campus'},
-        {'id': '3', 'name': 'Shaw'}
-      ];
+      Provider.of<BusInfoModel>(context, listen: false).updateBusInfo('''
+      {
+  "points": [
+    [1.12, 114.514], [3.345, 1.1], [19.19, 8.1]
+  ],
+  "segments": [
+    [0, 1, 2]
+  ],
+  "stops": {
+    "shho": 2,
+    "uc": 0
+  },
+  "routes": {
+    "1a": [
+      {
+        "name": "shho",
+        "segs": [0]
+      }
+    ]
+  }
+}
+      ''');
     });
   }
 
@@ -102,7 +120,7 @@ class _MyHomePageState extends State<MyHomePage> {
           child: IndexedStack(
         index: _selectedIndex,
         children: [
-          RoutePage(routes: routes),
+          RoutePage(),
           Text('test'),
           Text('test'),
           Text('test'),

@@ -1,10 +1,11 @@
 import 'package:flutter/material.dart';
+import 'package:provider/provider.dart';
+
 import 'route_detail.dart';
+import 'businfo_model.dart';
 
 class RoutePage extends StatefulWidget {
-  final List<Map>? routes;
-
-  const RoutePage({Key? key, required this.routes}) : super(key: key);
+  const RoutePage({Key? key}) : super(key: key);
 
   @override
   _RoutePageState createState() => _RoutePageState();
@@ -22,29 +23,38 @@ class _RoutePageState extends State<RoutePage> {
   }
 
   Widget _buildList() {
-    var routes = widget.routes;
-    if (routes == null) {
-      return const Center(child: Text('Fetching data...'));
-    } else {
-      return ListView.builder(
-        itemCount: routes.length * 2,
-        itemBuilder: (context, i) {
-          if (i.isOdd) return const Divider();
-          final index = i ~/ 2;
-          var route = routes[index];
-          return ListTile(
-              title: Text(route['id']),
-              subtitle: Text(route['name']),
-              onTap: () {
-                Navigator.push(
-                  context,
-                  MaterialPageRoute(
-                      builder: (context) =>
-                          RouteDetail(routeId: route['id'])),
-                );
-              }); /*Text(i.toString());*/
-        },
-      );
-    }
+    return Consumer<BusInfoModel>(builder: (context, infoModel, child) {
+      var _routes = infoModel.busInfo?.routes;
+      if (infoModel.errorOccured) {
+        return const Center(
+          child: Text('Error: Server returns invalid data.'),
+        );
+      } else if (_routes == null) {
+        return const Center(
+          child: Text('Fetching data...'),
+        );
+      } else {
+        return ListView.builder(
+          itemCount: _routes.entries.length * 2,
+          itemBuilder: (context, i) {
+            if (i.isOdd) return const Divider();
+            final index = i ~/ 2;
+            var route = _routes.entries.elementAt(index);
+            return ListTile(
+                title: Text(route.key),
+                subtitle: Text(route.key),
+                onTap: () {
+                  Navigator.push(
+                    context,
+                    MaterialPageRoute(
+                        builder: (context) => RouteDetail(
+                              routeId: route.key,
+                            )),
+                  );
+                });
+          },
+        );
+      }
+    });
   }
 }

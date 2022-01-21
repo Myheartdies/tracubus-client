@@ -20,7 +20,7 @@ class _RouteDetailState extends State<RouteDetail> {
         appBar: AppBar(title: Text(widget.routeId)),
         body: Column(crossAxisAlignment: CrossAxisAlignment.start, children: [
           Expanded(
-            child: Consumer<BusInfoModel>(
+            child: Consumer<BusLocationModel>(
               builder: (context, locationModel, child) => FlutterMap(
                 options: MapOptions(
                   bounds: LatLngBounds(
@@ -77,7 +77,7 @@ class _RouteDetailState extends State<RouteDetail> {
             ),
           ),
           // TODO: construct details page
-          Consumer<BusInfoModel>(
+          Consumer<BusLocationModel>(
               builder: (context, locationModel, child) =>
                   Expanded(child: Text('test ${locationModel.busLocation}')))
         ]));
