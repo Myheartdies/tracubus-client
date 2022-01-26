@@ -7,10 +7,10 @@ class StopInRoute {
   StopInRoute(this.name, this.segs);
 
   @JsonKey(required: true)
-  String name;
+  final String name;
 
   @JsonKey(required: true)
-  List<int> segs;
+  final List<int> segs;
 
   factory StopInRoute.fromJson(Map<String, dynamic> json) =>
       _$StopInRouteFromJson(json);
@@ -24,21 +24,21 @@ class BusInfo {
 
   /// points[idx] == [lat, lng]
   @JsonKey(required: true)
-  List<List<double>> points;
+  final List<List<double>> points;
 
   /// segments[idx] == [point1Idx, point2Idx, ...]
   @JsonKey(required: true)
-  List<List<int>> segments;
+  final List<List<int>> segments;
 
   /// stops['id'] == pointIdx
   @JsonKey(required: true)
-  Map<String, int> stops;
+  final Map<String, int> stops;
 
   /// e.g.
   /// routes['1A'][0].name == 'shho',
   /// routes['1A'][0].segs == [0, 1, 2, 3]
   @JsonKey(required: true)
-  Map<String, List<StopInRoute>> routes;
+  final Map<String, List<StopInRoute>> routes;
 
   factory BusInfo.fromJson(Map<String, dynamic> json) =>
       _$BusInfoFromJson(json);
@@ -58,22 +58,22 @@ class BusLocation {
   );
 
   @JsonKey(required: true)
-  double latitude;
+  final double latitude;
 
   @JsonKey(required: true)
-  double longitude;
+  final double longitude;
 
   @JsonKey(required: true)
-  String route;
+  final String route;
 
   @JsonKey(required: true)
-  double speed;
+  final double speed;
 
   @JsonKey(required: true)
-  int stop;
+  final int stop;
 
   @JsonKey(required: true)
-  int timestamp;
+  final int timestamp;
 
   factory BusLocation.fromJson(Map<String, dynamic> json) =>
       _$BusLocationFromJson(json);

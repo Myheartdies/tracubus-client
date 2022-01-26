@@ -1,4 +1,5 @@
 import 'dart:async';
+import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
 import 'package:flutter_client_sse/flutter_client_sse.dart';
@@ -44,11 +45,11 @@ class _MyHomePageState extends State<MyHomePage> {
   int _selectedIndex = 0;
   static const _bottomNavItems = [
     BottomNavigationBarItem(
-      icon: Icon(Icons.home),
+      icon: Icon(CupertinoIcons.list_number_rtl),
       label: 'Routes',
     ),
     BottomNavigationBarItem(
-      icon: Icon(Icons.bus_alert),
+      icon: Icon(CupertinoIcons.bus),
       label: 'EAT',
     ),
     BottomNavigationBarItem(
@@ -71,23 +72,72 @@ class _MyHomePageState extends State<MyHomePage> {
   void initState() {
     super.initState();
     // Initialize data here
-    fetchRoutes();
-    // fetchSomeData().then();
 
-    const url = "http://13.251.160.105:8080/api/info-sse";
-    SSEClient.subscribeToSSE(url, "").listen((event) {
+    // Fetch information about routes, stops, etc.
+    fetchRoutes();
+
+    // Fetch realtime location of buses
+    registerBusLocUpdater();
+  }
+
+  void registerBusLocUpdater() {
+    const url = "http://13.251.160.105:4242/api/info-sse";
+
+    // The time when the bus location was updated
+    int updateTime = 0;
+
+    // Data older than oodTh seconds ago will be treated as outdated
+    const int oodTh = 10;
+
+    /// onData callback for SSE stream
+    void dataHandler(event) {
+      int now = DateTime.now().millisecondsSinceEpoch;
       var data = event.data;
       if (event.event == "bus-info" && data != null) {
-        Provider.of<BusLocationModel>(context, listen: false).updateLocation(data);
+        Provider.of<BusLocationModel>(context, listen: false)
+            .updateLocation(data);
+        // print('Updated at $now');
+        updateTime = now;
       }
-    });
+    }
+
+    /// onError callback for SSE stream.
+    /// e.g. failing to initialize the connetion / connection closed while receiving data.
+    /// The callback doesn't reconnect. It only logs the error.
+    void errorHandler(err) {
+      // int now = DateTime.now().millisecondsSinceEpoch;
+      // print("Error at $now");
+      print(err);
+    }
+
+    /// Check if the location is outdated;
+    /// if yes, close SSE connection (if any) and fire a new one.
+    void checkBusLoc(timer) {
+      int now = DateTime.now().millisecondsSinceEpoch;
+      // print("Check if lost connection at $now...");
+
+      if (now - updateTime > oodTh * 1000) {
+        // print("Confirm lost: Reconnect SSE");
+
+        SSEClient.unsubscribeFromSSE();
+        SSEClient.subscribeToSSE(url, "").listen(
+          dataHandler,
+          onError: errorHandler,
+          cancelOnError: true,
+        );
+      }
+    }
+
+    var timer = Timer.periodic(const Duration(seconds: oodTh), checkBusLoc);
+    // Call the callback for an extra time to execute it immediately
+    checkBusLoc(timer);
   }
 
   Future<void> fetchRoutes() async {
     // TODO: Fetch real data from server
     return Future.delayed(const Duration(seconds: 2), () {
       Provider.of<BusInfoModel>(context, listen: false).updateBusInfo('''
-      {
+{
   "points": [
     [1.12, 114.514], [3.345, 1.1], [19.19, 8.1]
   ],
@@ -117,7 +167,7 @@ class _MyHomePageState extends State<MyHomePage> {
       body: Center(
           child: IndexedStack(
         index: _selectedIndex,
-        children: [
+        children: const [
           RoutePage(),
           Text('test'),
           Text('test'),

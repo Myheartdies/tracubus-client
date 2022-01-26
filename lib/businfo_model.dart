@@ -23,7 +23,7 @@ class BusInfoModel extends ChangeNotifier {
         notifyListeners();
         return;
       }
-    } on Exception catch (e) {
+    } catch (e) {
       // TODO: log the exception
 
     }
