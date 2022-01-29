@@ -78,7 +78,7 @@ class _MyHomePageState extends State<MyHomePage> {
     fetchRoutes();
 
     // Fetch realtime location of buses
-    registerBusLocUpdater();
+    // registerBusLocUpdater();
   }
 
   void registerBusLocUpdater() {
@@ -136,7 +136,7 @@ class _MyHomePageState extends State<MyHomePage> {
 
   Future<void> fetchRoutes() async {
     // TODO: Fetch real data from server
-    return Future.delayed(const Duration(seconds: 2), () {
+    return Future.delayed(const Duration(seconds: 0), () {
       Provider.of<BusInfoModel>(context, listen: false).updateBusInfo('''
 {
   "points": [

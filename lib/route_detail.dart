@@ -17,6 +17,9 @@ class RouteDetail extends StatefulWidget {
 }
 
 class _RouteDetailState extends State<RouteDetail> {
+  List<LatLng> pts = [];
+  var toImportStr = '', exportStr = '[]';
+
   @override
   Widget build(BuildContext context) {
     return Scaffold(
@@ -61,13 +64,18 @@ class _RouteDetailState extends State<RouteDetail> {
                       const FitBoundsOptions(padding: EdgeInsets.all(8.0)),
                   maxZoom: 18,
                   minZoom: 14,
+                  onTap: (tapPosition, latlng) {
+                    setState(() {
+                      pts.add(latlng);
+                    });
+                  },
                 ),
                 layers: [
                   TileLayerOptions(
                     urlTemplate:
                         "https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png",
                     subdomains: ['a', 'b', 'c'],
-                    retinaMode: true,
+                    retinaMode: false,
                     maxNativeZoom: 18,
                     maxZoom: 19,
                     minZoom: 13,
@@ -76,10 +84,7 @@ class _RouteDetailState extends State<RouteDetail> {
                     polylines: [
                       // TODO: Draw route
                       Polyline(
-                        points: <LatLng>[
-                          LatLng(22.42627619039879, 114.20044875763406),
-                          LatLng(22.412296074471833, 114.21381802755778),
-                        ],
+                        points: pts,
                         strokeWidth: 2.0,
                         gradientColors: [
                           const Color(0xffE40203),
@@ -107,17 +112,94 @@ class _RouteDetailState extends State<RouteDetail> {
                 ],
               ),
             );
-            details = Expanded(
-              child: Text(
-                _busLocations
-                    .map((e) => jsonEncode(e.toJson()))
-                    .toList()
-                    .toString(),
+            details = SizedBox(
+              width: 300,
+              child: Column(
+                children: [
+                  TextField(
+                    onChanged: (value) {
+                      setState(() {
+                        toImportStr = value;
+                      });
+                    },
+                  ),
+                  TextButton(
+                    onPressed: () {
+                      List ps = jsonDecode(toImportStr);
+                      var a = ps.map((e) {
+                        return LatLng(e[0], e[1]);
+                      }).toList();
+                      setState(() {
+                        pts = a;
+                      });
+                    },
+                    child: const Text('Import'),
+                  ),
+                  TextButton(
+                    onPressed: () {
+                      var t = pts
+                          .map((e) => '[${e.latitude}, ${e.longitude}]')
+                          .toList()
+                          .toString();
+                      setState(() {
+                        exportStr = t;
+                      });
+                      print(exportStr);
+                    },
+                    child: const Text('Export'),
+                  ),
+                  Text(exportStr),
+                  Expanded(
+                    child: ListView.builder(
+                      itemCount: pts.length,
+                      itemBuilder: (context, i) {
+                        return Container(
+                          child: Column(
+                            children: [
+                              Text('$i'),
+                              TextFormField(
+                                initialValue: pts[i].latitude.toString(),
+                                onChanged: (value) {
+                                  setState(() {
+                                    pts[i].latitude =
+                                        double.tryParse(value) ?? 0;
+                                  });
+                                },
+                              ),
+                              TextFormField(
+                                initialValue: pts[i].longitude.toString(),
+                                onChanged: (value) {
+                                  setState(() {
+                                    pts[i].longitude =
+                                        double.tryParse(value) ?? 0;
+                                  });
+                                },
+                              ),
+                              TextButton(
+                                onPressed: () {
+                                  setState(() {
+                                    pts.removeAt(i);
+                                  });
+                                },
+                                child: const Text('Delete'),
+                              ),
+                            ],
+                          ),
+                          decoration: BoxDecoration(
+                            border: Border.all(color: Colors.blueAccent),
+                          ),
+                          margin: const EdgeInsets.all(3.0),
+                          padding: const EdgeInsets.all(8.0),
+                        );
+                      },
+                    ),
+                  ),
+                ],
               ),
             );
           }
 
-          return Column(
+          return Row(
             crossAxisAlignment: CrossAxisAlignment.start,
             children: [
               if (map != null) map,
