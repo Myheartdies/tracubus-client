@@ -42,7 +42,7 @@ class _RoutePageState extends State<RoutePage> {
             var route = _routes.entries.elementAt(index);
             return ListTile(
                 title: Text(route.key),
-                subtitle: Text(route.key),
+                subtitle: Text(route.value.name),
                 onTap: () {
                   Navigator.push(
                     context,

@@ -25,7 +25,7 @@ class BusInfoModel extends ChangeNotifier {
       }
     } catch (e) {
       // TODO: log the exception
-
+      print(e);
     }
     errorOccured = true;
     notifyListeners();
@@ -43,8 +43,8 @@ class BusInfoModel extends ChangeNotifier {
     }
 
     for (var route in busInfo.routes.values) {
-      for (var stop in route) {
-        if (!busInfo.stops.containsKey(stop.name)) return false;
+      for (var stop in route.pieces) {
+        if (!busInfo.stops.containsKey(stop.stop)) return false;
         for (var n in stop.segs) {
           if (n >= busInfo.segments.length) return false;
         }
