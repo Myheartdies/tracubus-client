@@ -92,6 +92,7 @@ class _RouteDetailState extends State<RouteDetail> {
                 maxNativeZoom: 19,
                 maxZoom: 19,
                 minZoom: 15,
+                tileProvider: const NonCachingNetworkTileProvider(),
               ),
               PolylineLayerOptions(
                 polylines: [
