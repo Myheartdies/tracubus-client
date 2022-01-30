@@ -62,8 +62,8 @@ class _RouteDetailState extends State<RouteDetail> {
                       LatLng(22.412296074471833, 114.21381802755778)),
                   boundsOptions:
                       const FitBoundsOptions(padding: EdgeInsets.all(8.0)),
-                  maxZoom: 18,
-                  minZoom: 14,
+                  maxZoom: 19,
+                  minZoom: 15,
                   onTap: (tapPosition, latlng) {
                     setState(() {
                       pts.add(latlng);
@@ -76,9 +76,9 @@ class _RouteDetailState extends State<RouteDetail> {
                         "https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png",
                     subdomains: ['a', 'b', 'c'],
                     retinaMode: false,
-                    maxNativeZoom: 18,
+                    maxNativeZoom: 19,
                     maxZoom: 19,
-                    minZoom: 13,
+                    minZoom: 15,
                   ),
                   PolylineLayerOptions(
                     polylines: [
@@ -138,7 +138,11 @@ class _RouteDetailState extends State<RouteDetail> {
                   TextButton(
                     onPressed: () {
                       var t = pts
-                          .map((e) => '[${e.latitude}, ${e.longitude}]')
+                          .map((e) {
+                            var _lat = e.latitude.toStringAsFixed(6);
+                            var _lon = e.longitude.toStringAsFixed(6);
+                            return '[$_lat, $_lon]';
+                          })
                           .toList()
                           .toString();
                       setState(() {
@@ -148,7 +152,6 @@ class _RouteDetailState extends State<RouteDetail> {
                     },
                     child: const Text('Export'),
                   ),
-                  Text(exportStr),
                   Expanded(
                     child: ListView.builder(
                       itemCount: pts.length,
