@@ -1,9 +1,10 @@
+import 'package:collection/collection.dart';
 import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
 import 'package:flutter_map/flutter_map.dart';
+import 'package:scrollable_positioned_list/scrollable_positioned_list.dart';
 import 'package:latlong2/latlong.dart';
 import 'package:flutter/cupertino.dart';
-import 'dart:convert';
 
 import 'businfo.dart';
 import 'businfo_model.dart';
@@ -16,7 +17,13 @@ class RouteDetail extends StatefulWidget {
   _RouteDetailState createState() => _RouteDetailState();
 }
 
-class _RouteDetailState extends State<RouteDetail> {
+class _RouteDetailState extends State<RouteDetail>
+    with TickerProviderStateMixin {
+  String? selectedBusId;
+  BusLocation? selectedBusLocation;
+  final MapController mapController = MapController();
+  final ItemScrollController itemScrollController = ItemScrollController();
+
   @override
   Widget build(BuildContext context) {
     return Consumer2<BusInfoModel, BusLocationModel>(
@@ -45,44 +52,65 @@ class _RouteDetailState extends State<RouteDetail> {
                 .toList() ??
             const <BusLocation>[];
 
+        selectedBusLocation = selectedBusId == null
+            ? null
+            : _busLocations
+                .firstWhereOrNull((element) => element.id == selectedBusId);
+        var _selectedBus = selectedBusLocation;
+
         // For drawing buses
         List<LatLng> stopsLatLng = [];
         // For highlighting routes
-        List<List<LatLng>> routePolyLines = [];
+        List<Polyline> routePolyLines = [];
+        var activeColor = Colors.red;
+        var inactiveColor = Colors.red[100] ?? Colors.grey;
 
         var allStops = _busInfo.stops;
         var allPts = _busInfo.points;
         var allSegs = _busInfo.segments;
 
-        for (var e in route.pieces) {
-          List<LatLng> polyLine = [];
+        route.pieces.forEachIndexed((i, e) {
+          List<LatLng> polyLinePts = [];
           if (allStops.containsKey(e.stop)) {
-            // TODO: Use offset(?) to align the icon
             stopsLatLng.add(LatLng(
               allPts[allStops[e.stop]!][0],
               allPts[allStops[e.stop]!][1],
             ));
             for (var s in e.segs) {
               for (var p in allSegs[s]) {
-                polyLine.add(LatLng(allPts[p][0], allPts[p][1]));
+                polyLinePts.add(LatLng(allPts[p][0], allPts[p][1]));
               }
             }
           }
-          routePolyLines.add(polyLine);
-        }
+          var line = Polyline(
+            points: polyLinePts,
+            strokeWidth: 2.0,
+            gradientColors: [
+              // When a bus is selected, the passed routes will
+              // be shown in a lighter color
+              _selectedBus == null
+                  ? activeColor
+                  : (_selectedBus.stop <= i ? activeColor : inactiveColor),
+            ],
+          );
+          routePolyLines.add(line);
+        });
 
         // Construct the map
         map = Expanded(
           child: FlutterMap(
+            mapController: mapController,
             options: MapOptions(
               // TODO: change the range of diplay?
               bounds: LatLngBounds(
-                  LatLng(22.42627619039879, 114.20044875763406),
-                  LatLng(22.412296074471833, 114.21381802755778)),
+                  LatLng(22.413284, 114.212981), LatLng(22.425968, 114.200169)),
               boundsOptions:
                   const FitBoundsOptions(padding: EdgeInsets.all(8.0)),
               maxZoom: 19,
-              minZoom: 15,
+              minZoom: 14,
+              onTap: (tapPosition, point) {
+                setState(() => selectedBusId = null);
+              },
             ),
             layers: [
               TileLayerOptions(
@@ -91,35 +119,39 @@ class _RouteDetailState extends State<RouteDetail> {
                 subdomains: ['a', 'b', 'c'],
                 maxNativeZoom: 19,
                 maxZoom: 19,
-                minZoom: 15,
+                minZoom: 14,
                 tileProvider: const NonCachingNetworkTileProvider(),
               ),
               PolylineLayerOptions(
-                polylines: [
-                  for (var l in routePolyLines)
-                    Polyline(
-                      points: l,
-                      strokeWidth: 2.0,
-                      gradientColors: [
-                        Colors.red,
-                      ],
-                    ),
-                ],
+                polylines: routePolyLines,
               ),
               MarkerLayerOptions(
                 markers: [
                   // Buses
-                  for (var busLocation in _busLocations)
+                  for (var bus in _busLocations)
                     Marker(
-                      width: 20.0,
-                      height: 20.0,
-                      point: LatLng(
-                        busLocation.latitude,
-                        busLocation.longitude,
-                      ),
-                      builder: (ctx) => const Icon(
-                        CupertinoIcons.bus,
-                        color: Colors.blue,
+                      width: 40.0,
+                      height: 40.0,
+                      point: LatLng(bus.latitude, bus.longitude),
+                      anchorPos: AnchorPos.exactly(Anchor(22, 15)),
+                      builder: (ctx) => GestureDetector(
+                        onTap: () {
+                          setState(() {
+                            selectedBusId = bus.id;
+                          });
+                          _animatedMapMove(
+                            LatLng(bus.latitude, bus.longitude),
+                            mapController.zoom,
+                          );
+                          itemScrollController.scrollTo(
+                            index: bus.stop,
+                            duration: const Duration(milliseconds: 10),
+                          );
+                        },
+                        child: const Icon(
+                          CupertinoIcons.bus,
+                          color: Colors.blue,
+                        ),
                       ),
                     ),
                   // Stops
@@ -128,8 +160,9 @@ class _RouteDetailState extends State<RouteDetail> {
                       width: 20.0,
                       height: 20.0,
                       point: stop,
+                      anchorPos: AnchorPos.exactly(Anchor(10, -3)),
                       builder: (ctx) => const Icon(
-                        CupertinoIcons.location,
+                        CupertinoIcons.location_solid,
                         color: Colors.red,
                       ),
                     ),
@@ -139,9 +172,28 @@ class _RouteDetailState extends State<RouteDetail> {
           ),
         );
         details = Expanded(
-          child: Text(
-            route.pieces.map((e) => e.stop).toList().toString(),
-          ),
+          child: ScrollablePositionedList.builder(
+              itemCount: route.pieces.length,
+              itemScrollController: itemScrollController,
+              itemBuilder: (context, i) {
+                var stop = route.pieces[i];
+                return ListTile(
+                  selected:
+                      _selectedBus == null ? false : _selectedBus.stop + 1 == i,
+                  enabled:
+                      _selectedBus == null ? true : _selectedBus.stop + 1 <= i,
+                  // TODO: Change the icon
+                  leading: const Icon(Icons.circle_outlined),
+                  title: Text(stop.stop),
+                  trailing: Text('2 min'),
+                  onTap: () {
+                    if (allStops.containsKey(stop.stop)) {
+                      var p = allPts[allStops[stop.stop]!];
+                      _animatedMapMove(LatLng(p[0], p[1]), mapController.zoom);
+                    }
+                  },
+                );
+              }),
         );
       }
 
@@ -157,5 +209,35 @@ class _RouteDetailState extends State<RouteDetail> {
         ),
       );
     });
+  }
+
+  // Taken from the library example
+  void _animatedMapMove(LatLng destLocation, double destZoom) {
+    final _latTween = Tween<double>(
+        begin: mapController.center.latitude, end: destLocation.latitude);
+    final _lngTween = Tween<double>(
+        begin: mapController.center.longitude, end: destLocation.longitude);
+    final _zoomTween = Tween<double>(begin: mapController.zoom, end: destZoom);
+
+    var controller = AnimationController(
+        duration: const Duration(milliseconds: 500), vsync: this);
+    Animation<double> animation =
+        CurvedAnimation(parent: controller, curve: Curves.fastOutSlowIn);
+
+    controller.addListener(() {
+      mapController.move(
+          LatLng(_latTween.evaluate(animation), _lngTween.evaluate(animation)),
+          _zoomTween.evaluate(animation));
+    });
+
+    animation.addStatusListener((status) {
+      if (status == AnimationStatus.completed) {
+        controller.dispose();
+      } else if (status == AnimationStatus.dismissed) {
+        controller.dispose();
+      }
+    });
+
+    controller.forward();
   }
 }

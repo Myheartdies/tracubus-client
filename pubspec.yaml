@@ -42,6 +42,8 @@ dependencies:
 
   json_annotation: ^4.4.0
 
+  scrollable_positioned_list: ^0.2.3
+
   flutter_client_sse:
     path: ./lib/flutter_client_sse
 

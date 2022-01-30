@@ -15,7 +15,8 @@ class BusRoute {
   @JsonKey(required: true)
   final List<StopInRoute> pieces;
 
-  factory BusRoute.fromJson(Map<String, dynamic> json) => _$BusRouteFromJson(json);
+  factory BusRoute.fromJson(Map<String, dynamic> json) =>
+      _$BusRouteFromJson(json);
 
   Map<String, dynamic> toJson() => _$BusRouteToJson(this);
 }
@@ -67,6 +68,7 @@ class BusInfo {
 @JsonSerializable()
 class BusLocation {
   BusLocation(
+    this.id,
     this.latitude,
     this.longitude,
     this.route,
@@ -74,6 +76,9 @@ class BusLocation {
     this.stop,
     this.timestamp,
   );
+
+  @JsonKey(required: true)
+  final String id;
 
   @JsonKey(required: true)
   final double latitude;
