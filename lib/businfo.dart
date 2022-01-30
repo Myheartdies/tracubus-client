@@ -3,14 +3,35 @@ import 'package:json_annotation/json_annotation.dart';
 part 'businfo.g.dart';
 
 @JsonSerializable()
-class StopInRoute {
-  StopInRoute(this.name, this.segs);
+class BusRoute {
+  BusRoute(this.name, this.info, this.pieces);
 
   @JsonKey(required: true)
   final String name;
 
   @JsonKey(required: true)
+  final String info;
+
+  @JsonKey(required: true)
+  final List<StopInRoute> pieces;
+
+  factory BusRoute.fromJson(Map<String, dynamic> json) => _$BusRouteFromJson(json);
+
+  Map<String, dynamic> toJson() => _$BusRouteToJson(this);
+}
+
+@JsonSerializable()
+class StopInRoute {
+  StopInRoute(this.stop, this.segs, this.time);
+
+  @JsonKey(required: true)
+  final String stop;
+
+  @JsonKey(required: true)
   final List<int> segs;
+
+  @JsonKey(required: true)
+  final double time;
 
   factory StopInRoute.fromJson(Map<String, dynamic> json) =>
       _$StopInRouteFromJson(json);
@@ -34,11 +55,8 @@ class BusInfo {
   @JsonKey(required: true)
   final Map<String, int> stops;
 
-  /// e.g.
-  /// routes['1A'][0].name == 'shho',
-  /// routes['1A'][0].segs == [0, 1, 2, 3]
   @JsonKey(required: true)
-  final Map<String, List<StopInRoute>> routes;
+  final Map<String, BusRoute> routes;
 
   factory BusInfo.fromJson(Map<String, dynamic> json) =>
       _$BusInfoFromJson(json);

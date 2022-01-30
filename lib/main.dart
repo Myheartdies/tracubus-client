@@ -1,6 +1,7 @@
 import 'dart:async';
 import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
+import 'package:http/http.dart' as http;
 import 'package:provider/provider.dart';
 import 'package:flutter_client_sse/flutter_client_sse.dart';
 
@@ -82,7 +83,7 @@ class _MyHomePageState extends State<MyHomePage> {
   }
 
   void registerBusLocUpdater() {
-    const url = "http://13.251.160.105:4242/api/info-sse";
+    const url = "http://20.24.96.85:4242/api/info-sse";
 
     // The time when the bus location was updated
     int updateTime = 0;
@@ -135,31 +136,17 @@ class _MyHomePageState extends State<MyHomePage> {
   }
 
   Future<void> fetchRoutes() async {
-    // TODO: Fetch real data from server
-    return Future.delayed(const Duration(seconds: 2), () {
-      Provider.of<BusInfoModel>(context, listen: false).updateBusInfo('''
-{
-  "points": [
-    [1.12, 114.514], [3.345, 1.1], [19.19, 8.1]
-  ],
-  "segments": [
-    [0, 1, 2]
-  ],
-  "stops": {
-    "shho": 2,
-    "uc": 0
-  },
-  "routes": {
-    "1a": [
-      {
-        "name": "shho",
-        "segs": [0]
-      }
-    ]
-  }
-}
-      ''');
-    });
+    var j = '';
+    try {
+      var response =
+          await http.get(Uri.parse('http://20.24.96.85:4242/api/routes.json'));
+      j = response.body;
+    } catch (e) {
+      print(e);
+    }
+    Provider.of<BusInfoModel>(context, listen: false).updateBusInfo(j);
+    // TODO: Maybe some pre-calculation here?
+
   }
 
   @override
