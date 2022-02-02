@@ -1,5 +1,4 @@
 import 'dart:async';
-import 'dart:io';
 import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
 import 'package:http/http.dart' as http;
@@ -143,7 +142,6 @@ class _MyHomePageState extends State<MyHomePage> {
           await http.get(Uri.parse('http://20.24.96.85:4242/api/routes.json'));
       j = response.body;
       Provider.of<BusInfoModel>(context, listen: false).updateBusInfo(j);
-      // TODO: Maybe some pre-calculation here?
     } catch (e) {
       print('Error fetching routes info: $e');
       // TODO: Display network error
