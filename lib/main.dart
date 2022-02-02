@@ -1,4 +1,5 @@
 import 'dart:async';
+import 'dart:io';
 import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
 import 'package:http/http.dart' as http;
@@ -119,7 +120,7 @@ class _MyHomePageState extends State<MyHomePage> {
       // print("Check if lost connection at $now...");
 
       if (now - updateTime > oodTh * 1000) {
-        // print("Confirm lost: Reconnect SSE");
+        print("Confirm lost: Reconnect SSE");
 
         SSEClient.unsubscribeFromSSE();
         SSEClient.subscribeToSSE(url, "").listen(
@@ -141,12 +142,12 @@ class _MyHomePageState extends State<MyHomePage> {
       var response =
           await http.get(Uri.parse('http://20.24.96.85:4242/api/routes.json'));
       j = response.body;
+      Provider.of<BusInfoModel>(context, listen: false).updateBusInfo(j);
+      // TODO: Maybe some pre-calculation here?
     } catch (e) {
-      print(e);
+      print('Error fetching routes info: $e');
+      // TODO: Display network error
     }
-    Provider.of<BusInfoModel>(context, listen: false).updateBusInfo(j);
-    // TODO: Maybe some pre-calculation here?
-
   }
 
   @override
