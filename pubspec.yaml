@@ -44,6 +44,8 @@ dependencies:
 
   scrollable_positioned_list: ^0.2.3
 
+  awesome_select: ^5.1.0
+
   flutter_client_sse:
     path: ./lib/flutter_client_sse
 
