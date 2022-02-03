@@ -4,7 +4,17 @@ part 'businfo.g.dart';
 
 @JsonSerializable()
 class BusRoute {
-  BusRoute(this.name, this.info, this.pieces);
+  BusRoute(
+    this.name,
+    this.info,
+    this.departure,
+    this.pieces,
+    this.avgTime,
+    this.minLat,
+    this.maxLat,
+    this.minLng,
+    this.maxLng,
+  );
 
   @JsonKey(required: true)
   final String name;
@@ -13,7 +23,28 @@ class BusRoute {
   final String info;
 
   @JsonKey(required: true)
+  final List<int> departure;
+
+  @JsonKey(required: true)
   final List<StopInRoute> pieces;
+
+  /// In seconds.
+  /// For time from i to j, use `avgTime['$i-$j']`.
+  /// Guarenteed to be non-negative.
+  @JsonKey(defaultValue: <String, int>{})
+  final Map<String, int> avgTime;
+
+  @JsonKey(defaultValue: 90)
+  double minLat;
+
+  @JsonKey(defaultValue: 0)
+  double maxLat;
+
+  @JsonKey(defaultValue: 180)
+  double minLng;
+
+  @JsonKey(defaultValue: 0)
+  double maxLng;
 
   factory BusRoute.fromJson(Map<String, dynamic> json) =>
       _$BusRouteFromJson(json);
@@ -31,8 +62,9 @@ class StopInRoute {
   @JsonKey(required: true)
   final List<int> segs;
 
+  /// In seconds
   @JsonKey(required: true)
-  final double time;
+  final int time;
 
   factory StopInRoute.fromJson(Map<String, dynamic> json) =>
       _$StopInRouteFromJson(json);
@@ -75,6 +107,7 @@ class BusLocation {
     this.speed,
     this.stop,
     this.timestamp,
+    this.remaining,
   );
 
   @JsonKey(required: true)
@@ -97,6 +130,10 @@ class BusLocation {
 
   @JsonKey(required: true)
   final int timestamp;
+
+  /// In seconds
+  @JsonKey(required: true)
+  final int remaining;
 
   factory BusLocation.fromJson(Map<String, dynamic> json) =>
       _$BusLocationFromJson(json);

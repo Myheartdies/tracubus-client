@@ -41,17 +41,18 @@ class _RoutePageState extends State<RoutePage> {
             final index = i ~/ 2;
             var route = _routes.entries.elementAt(index);
             return ListTile(
-                title: Text(route.key),
-                subtitle: Text(route.value.name),
-                onTap: () {
-                  Navigator.push(
-                    context,
-                    MaterialPageRoute(
-                        builder: (context) => RouteDetail(
-                              routeId: route.key,
-                            )),
-                  );
-                });
+              title: Text(route.key),
+              subtitle: Text(route.value.name),
+              onTap: () {
+                Navigator.push(
+                  context,
+                  MaterialPageRoute(
+                      builder: (context) => RouteDetail(
+                            routeId: route.key,
+                          )),
+                );
+              },
+            );
           },
         );
       }

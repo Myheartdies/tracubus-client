@@ -1,5 +1,6 @@
 import 'package:collection/collection.dart';
 import 'package:flutter/material.dart';
+import 'package:flutter_map/plugin_api.dart';
 import 'package:provider/provider.dart';
 import 'package:flutter_map/flutter_map.dart';
 import 'package:scrollable_positioned_list/scrollable_positioned_list.dart';
@@ -63,7 +64,7 @@ class _RouteDetailState extends State<RouteDetail>
         // For highlighting routes
         List<Polyline> routePolyLines = [];
         var activeColor = Colors.red;
-        var inactiveColor = Colors.red[100] ?? Colors.grey;
+        var inactiveColor = Colors.red.shade100;
 
         var allStops = _busInfo.stops;
         var allPts = _busInfo.points;
@@ -101,11 +102,13 @@ class _RouteDetailState extends State<RouteDetail>
           child: FlutterMap(
             mapController: mapController,
             options: MapOptions(
-              // TODO: change the range of diplay?
               bounds: LatLngBounds(
-                  LatLng(22.413284, 114.212981), LatLng(22.425968, 114.200169)),
+                LatLng(route.maxLat, route.minLng),
+                LatLng(route.minLat, route.maxLng),
+              ),
               boundsOptions:
-                  const FitBoundsOptions(padding: EdgeInsets.all(8.0)),
+                  const FitBoundsOptions(padding: EdgeInsets.all(30.0)),
+              interactiveFlags: InteractiveFlag.all & ~InteractiveFlag.rotate,
               maxZoom: 19,
               minZoom: 14,
               onTap: (tapPosition, point) {
@@ -185,11 +188,16 @@ class _RouteDetailState extends State<RouteDetail>
                   // TODO: Change the icon
                   leading: const Icon(Icons.circle_outlined),
                   title: Text(stop.stop),
-                  trailing: Text('2 min'),
+                  trailing: Text(
+                    _selectedBus == null
+                        ? ''
+                        : BusInfoModel.timeString(
+                            stop.stop, _selectedBus, _busInfo),
+                  ),
                   onTap: () {
                     if (allStops.containsKey(stop.stop)) {
                       var p = allPts[allStops[stop.stop]!];
-                      _animatedMapMove(LatLng(p[0], p[1]), mapController.zoom);
+                      _animatedMapMove(LatLng(p[0], p[1]), 17);
                     }
                   },
                 );
