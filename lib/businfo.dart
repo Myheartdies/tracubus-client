@@ -7,6 +7,7 @@ class BusRoute {
   BusRoute(
     this.name,
     this.info,
+    this.departure,
     this.pieces,
     this.avgTime,
     this.minLat,
@@ -20,6 +21,9 @@ class BusRoute {
 
   @JsonKey(required: true)
   final String info;
+
+  @JsonKey(required: true)
+  final List<int> departure;
 
   @JsonKey(required: true)
   final List<StopInRoute> pieces;

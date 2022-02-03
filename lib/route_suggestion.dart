@@ -2,7 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
 
 import 'package:awesome_select/awesome_select.dart';
-import 'package:tracubus/businfo.dart';
+import 'businfo.dart';
 
 import 'route_detail.dart';
 import 'businfo_model.dart';
@@ -101,7 +101,7 @@ class _RouteSuggestState extends State<RouteSuggest> {
                     decoration: BoxDecoration(
                       border: Border(
                         bottom: BorderSide(
-                          color: Colors.grey[300] ?? Colors.grey,
+                          color: Colors.grey.shade300,
                         ),
                       ),
                     ),

@@ -2,7 +2,7 @@ import 'dart:convert';
 import 'dart:math';
 
 import 'package:flutter/foundation.dart';
-import 'package:tracubus/businfo.dart';
+import 'businfo.dart';
 
 /// This model extends ChangeNotifier and holds infomation fetched from server
 /// Initially `busInfo == null` and `errorOccured == false`.
@@ -89,15 +89,7 @@ class BusInfoModel extends ChangeNotifier {
 
   static String timeString(String stopId, BusLocation bus, BusInfo busInfo) {
     int time = estimatedTime(stopId, bus, busInfo);
-    if (time < 0) {
-      return '-';
-    } else if (time < 5) {
-      return 'Arrived';
-    } else if (time < 60) {
-      return 'Arriving soon';
-    } else {
-      return '${time ~/ 60} min';
-    }
+    return timeToString(time);
   }
 
   /// returns the time left for the bus to reach this stop
@@ -121,6 +113,18 @@ class BusInfoModel extends ChangeNotifier {
       } else {
         return bus.remaining + avg;
       }
+    }
+  }
+
+  static String timeToString(int time) {
+    if (time < 0) {
+      return '-';
+    } else if (time < 5) {
+      return 'Arrived';
+    } else if (time < 60) {
+      return 'Arriving soon';
+    } else {
+      return '${time ~/ 60} min';
     }
   }
 }

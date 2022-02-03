@@ -46,6 +46,8 @@ dependencies:
 
   awesome_select: ^5.1.0
 
+  location: ^4.2.0
+
   flutter_client_sse:
     path: ./lib/flutter_client_sse
 

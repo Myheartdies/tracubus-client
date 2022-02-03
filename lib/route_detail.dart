@@ -64,7 +64,7 @@ class _RouteDetailState extends State<RouteDetail>
         // For highlighting routes
         List<Polyline> routePolyLines = [];
         var activeColor = Colors.red;
-        var inactiveColor = Colors.red[100] ?? Colors.grey;
+        var inactiveColor = Colors.red.shade100;
 
         var allStops = _busInfo.stops;
         var allPts = _busInfo.points;

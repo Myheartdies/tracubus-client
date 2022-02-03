@@ -6,6 +6,7 @@ import 'package:provider/provider.dart';
 import 'package:flutter_client_sse/flutter_client_sse.dart';
 
 import 'route_page.dart';
+import 'eta_page.dart';
 import 'route_suggestion.dart';
 import 'businfo_model.dart';
 
@@ -156,7 +157,7 @@ class _MyHomePageState extends State<MyHomePage> {
         index: _selectedIndex,
         children: const [
           RoutePage(),
-          Text('test'),
+          ETAPage(),
           RouteSuggest(),
           Text('test'),
         ],
