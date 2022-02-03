@@ -8,6 +8,7 @@ import 'package:flutter_client_sse/flutter_client_sse.dart';
 import 'route_page.dart';
 import 'eta_page.dart';
 import 'route_suggestion.dart';
+import 'others_page.dart';
 import 'businfo_model.dart';
 
 void main() {
@@ -159,7 +160,7 @@ class _MyHomePageState extends State<MyHomePage> {
           RoutePage(),
           ETAPage(),
           RouteSuggest(),
-          Text('test'),
+          OthersPage(),
         ],
       )),
       bottomNavigationBar: BottomNavigationBar(
