@@ -85,7 +85,7 @@ class _MyHomePageState extends State<MyHomePage> {
   }
 
   void registerBusLocUpdater() {
-    const url = "http://20.24.96.85:4242/api/info-sse";
+    const url = "http://20.24.87.7:4242/api/info-sse";
 
     // The time when the bus location was updated
     int updateTime = 0;
@@ -141,7 +141,7 @@ class _MyHomePageState extends State<MyHomePage> {
     var j = '';
     try {
       var response =
-          await http.get(Uri.parse('http://20.24.96.85:4242/api/routes.json'));
+          await http.get(Uri.parse('http://20.24.87.7:4242/api/routes.json'));
       j = response.body;
       Provider.of<BusInfoModel>(context, listen: false).updateBusInfo(j);
     } catch (e) {
