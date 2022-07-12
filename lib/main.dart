@@ -124,7 +124,7 @@ class _MyHomePageState extends State<MyHomePage> {
         print("Confirm lost: Reconnect SSE");
 
         SSEClient.unsubscribeFromSSE();
-        SSEClient.subscribeToSSE(url, "").listen(
+        SSEClient.subscribeToSSE(url: url, header: {}).listen(
           dataHandler,
           onError: errorHandler,
           cancelOnError: true,
