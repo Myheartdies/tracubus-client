@@ -1,11 +1,11 @@
 import 'dart:async';
+import 'dart:html';
 import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_gen/gen_l10n/app_localizations.dart';
 import 'package:flutter_localizations/flutter_localizations.dart';
 import 'package:http/http.dart' as http;
 import 'package:provider/provider.dart';
-import 'package:flutter_client_sse/flutter_client_sse.dart';
 
 import 'route_page.dart';
 import 'eta_page.dart';
@@ -112,26 +112,30 @@ class _MyHomePageState extends State<MyHomePage> {
     // Data older than oodTh seconds ago will be treated as outdated
     const int oodTh = 10;
 
+    // The sse instance for web
+    late EventSource es;
+
     /// onData callback for SSE stream
     void dataHandler(event) {
       int now = DateTime.now().millisecondsSinceEpoch;
-      var data = event.data;
-      if (event.event == "bus-info" && data != null) {
-        Provider.of<BusLocationModel>(context, listen: false)
-            .updateLocation(data);
-        // print('Updated at $now');
-        updateTime = now;
-      }
+      String data = (event as MessageEvent).data as String;
+      Provider.of<BusLocationModel>(context, listen: false)
+          .updateLocation(data);
+      // print('Updated at $now');
+      updateTime = now;
     }
 
     /// onError callback for SSE stream.
     /// e.g. failing to initialize the connetion / connection closed while receiving data.
     /// The callback doesn't reconnect. It only logs the error.
     void errorHandler(err) {
-      // int now = DateTime.now().millisecondsSinceEpoch;
-      // print("Error at $now");
-      print(err);
+      print("An error occured to the sse.");
     }
+
+    // Subscribe to sse
+    es = new EventSource(url);
+    es.addEventListener('bus-info', dataHandler);
+    es.onError.listen(errorHandler);
 
     /// Check if the location is outdated;
     /// if yes, close SSE connection (if any) and fire a new one.
@@ -141,19 +145,14 @@ class _MyHomePageState extends State<MyHomePage> {
 
       if (now - updateTime > oodTh * 1000) {
         print("Confirm lost: Reconnect SSE");
-
-        SSEClient.unsubscribeFromSSE();
-        SSEClient.subscribeToSSE(url: url, header: {}).listen(
-          dataHandler,
-          onError: errorHandler,
-          cancelOnError: true,
-        );
+        es.close();
+        es = new EventSource(url);
+        es.addEventListener('bus-info', dataHandler);
+        es.onError.listen(errorHandler);
       }
     }
 
     var timer = Timer.periodic(const Duration(seconds: oodTh), checkBusLoc);
-    // Call the callback for an extra time to execute it immediately
-    checkBusLoc(timer);
   }
 
   Future<void> fetchRoutes() async {
