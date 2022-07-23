@@ -202,10 +202,10 @@ class _ETAPageState extends State<ETAPage> {
               children: [
                 Container(
                   color: Colors.blue.shade100,
-                  padding: const EdgeInsets.all(12),
+                  padding: const EdgeInsets.all(8),
                   child: Text(
                     stop.name,
-                    style: textTheme.subtitle1,
+                    style: textTheme.subtitle2,
                     textAlign: TextAlign.start,
                   ),
                 ),
@@ -221,7 +221,16 @@ class _ETAPageState extends State<ETAPage> {
                             builder: (context) =>
                                 RouteDetail(routeId: route.id)),
                       ),
-                    )
+                    ),
+                // Add a placeholder when routes are empty
+                if (stop.routes.isEmpty)
+                  Container(
+                      padding: const EdgeInsets.all(12),
+                      child: Text(
+                        "No bus arriving",
+                        style: textTheme.caption,
+                        textAlign: TextAlign.start,
+                      ))
               ],
             );
           },
