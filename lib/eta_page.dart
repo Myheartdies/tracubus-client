@@ -192,49 +192,59 @@ class _ETAPageState extends State<ETAPage> {
           stopList.sort((a, b) => a.name.compareTo(b.name));
         }
 
-        return ListView.builder(
-          itemCount: stopList.length,
-          itemBuilder: (context, index) {
-            var stop = stopList[index];
-            var textTheme = Theme.of(context).textTheme;
-            return Column(
-              crossAxisAlignment: CrossAxisAlignment.stretch,
-              children: [
-                Container(
-                  color: Colors.blue.shade100,
-                  padding: const EdgeInsets.all(8),
-                  child: Text(
-                    stop.name,
-                    style: textTheme.subtitle2,
-                    textAlign: TextAlign.start,
-                  ),
-                ),
-                if (stop.routes.isNotEmpty)
-                  for (var route in stop.routes)
-                    ListTile(
-                      title: Text(route.id),
-                      subtitle: Text(route.name),
-                      trailing: Text(route.timeString),
-                      onTap: () => Navigator.push(
-                        context,
-                        MaterialPageRoute(
-                            builder: (context) =>
-                                RouteDetail(routeId: route.id)),
-                      ),
-                    ),
-                // Add a placeholder when routes are empty
-                if (stop.routes.isEmpty)
+        var textTheme = Theme.of(context).textTheme;
+        return Column(children: [
+          if (!_sortEnabled)
+            Container(
+                padding: const EdgeInsets.all(12),
+                child: Text(
+                  "Hint: click the icon at top-right corner to find stations close to you",
+                  style: textTheme.caption,
+                )),
+          Expanded(
+              child: ListView.builder(
+            itemCount: stopList.length,
+            itemBuilder: (context, index) {
+              var stop = stopList[index];
+              return Column(
+                crossAxisAlignment: CrossAxisAlignment.stretch,
+                children: [
                   Container(
-                      padding: const EdgeInsets.all(12),
-                      child: Text(
-                        "No bus arriving",
-                        style: textTheme.caption,
-                        textAlign: TextAlign.start,
-                      ))
-              ],
-            );
-          },
-        );
+                    color: Colors.blue.shade100,
+                    padding: const EdgeInsets.all(8),
+                    child: Text(
+                      stop.name,
+                      style: textTheme.subtitle2,
+                      textAlign: TextAlign.start,
+                    ),
+                  ),
+                  if (stop.routes.isNotEmpty)
+                    for (var route in stop.routes)
+                      ListTile(
+                        title: Text(route.id),
+                        subtitle: Text(route.name),
+                        trailing: Text(route.timeString),
+                        onTap: () => Navigator.push(
+                          context,
+                          MaterialPageRoute(
+                              builder: (context) =>
+                                  RouteDetail(routeId: route.id)),
+                        ),
+                      ),
+                  // Add a placeholder when routes are empty
+                  if (stop.routes.isEmpty)
+                    Container(
+                        padding: const EdgeInsets.all(12),
+                        child: Text(
+                          "No bus arriving",
+                          style: textTheme.caption,
+                          textAlign: TextAlign.start,
+                        ))
+                ],
+              );
+            },
+          ))
+        ]);
       }),
     );
   }
