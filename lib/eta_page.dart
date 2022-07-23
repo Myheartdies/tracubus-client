@@ -179,14 +179,17 @@ class _ETAPageState extends State<ETAPage> {
           stop.routes.sort((s1, s2) => s1.time.compareTo(s2.time));
         });
 
-        var stopList = stops.values.toList();
-        // Sort the stops by distance
+        var stopList = stops.values.toList(growable: false);
         if (_sortEnabled) {
+          // Sort the stops by distance
           var distance = const Distance();
           var myLoc = LatLng(_lat, _lng);
           stopList.sort((s1, s2) => distance
               .as(LengthUnit.Meter, myLoc, s1.loc)
               .compareTo(distance.as(LengthUnit.Meter, myLoc, s2.loc)));
+        } else {
+          // Sort the stops by alphabet
+          stopList.sort((a, b) => a.name.compareTo(b.name));
         }
 
         return ListView.builder(

@@ -34,7 +34,9 @@ class _RouteSuggestState extends State<RouteSuggest> {
           );
         }
 
-        var stopList = _busInfo.stops.keys.map((stopName) {
+        var stopKeys = _busInfo.stops.keys.toList(growable: false);
+        stopKeys.sort();
+        var stopList = stopKeys.map((stopName) {
           return S2Choice(value: stopName, title: stopName);
         }).toList();
 
