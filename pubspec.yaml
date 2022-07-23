@@ -48,8 +48,7 @@ dependencies:
 
   location: ^4.2.0
 
-  flutter_client_sse:
-    path: ./lib/flutter_client_sse
+  flutter_client_sse: ^1.0.0
 
 dev_dependencies:
   flutter_test:

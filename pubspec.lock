@@ -205,10 +205,10 @@ packages:
   flutter_client_sse:
     dependency: "direct main"
     description:
-      path: "lib/flutter_client_sse"
-      relative: true
-    source: path
-    version: "0.0.6"
+      name: flutter_client_sse
+      url: "https://pub.dartlang.org"
+    source: hosted
+    version: "1.0.0"
   flutter_lints:
     dependency: "direct dev"
     description:

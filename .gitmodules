@@ -1,3 +1,0 @@
-[submodule "lib/flutter_client_sse"]
-	path = lib/flutter_client_sse
-	url = git@github.com:foxB612/flutter_client_sse.git
