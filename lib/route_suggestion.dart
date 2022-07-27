@@ -61,7 +61,10 @@ class _RouteSuggestState extends State<RouteSuggest> {
                 choiceItems: stopList,
                 onChange: (selected) =>
                     setState(() => _srcStopName = selected.value ?? ''),
-                modalType: S2ModalType.popupDialog,
+                modalType: S2ModalType.fullPage,
+                modalFilter: true,
+                modalFilterAuto: true,
+                modalFilterHint: "Search starting place",
                 tileBuilder: (context, state) => ListTile(
                   leading: Column(
                     mainAxisAlignment: MainAxisAlignment.center,
@@ -78,7 +81,10 @@ class _RouteSuggestState extends State<RouteSuggest> {
                 choiceItems: stopList,
                 onChange: (selected) =>
                     setState(() => _destStopName = selected.value ?? ''),
-                modalType: S2ModalType.popupDialog,
+                modalType: S2ModalType.fullPage,
+                modalFilter: true,
+                modalFilterAuto: true,
+                modalFilterHint: "Search destination",
                 tileBuilder: (context, state) => ListTile(
                   leading: Column(
                     mainAxisAlignment: MainAxisAlignment.center,
