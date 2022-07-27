@@ -12,6 +12,7 @@ import 'eta_page.dart';
 import 'route_suggestion.dart';
 import 'others_page.dart';
 import 'businfo_model.dart';
+import 'settings_model.dart';
 
 void main() {
   runApp(
@@ -19,6 +20,7 @@ void main() {
       providers: [
         ChangeNotifierProvider(create: (context) => BusLocationModel()),
         ChangeNotifierProvider(create: (context) => BusInfoModel()),
+        ChangeNotifierProvider(create: (context) => SettingsModel()),
       ],
       child: const MyApp(),
     ),
@@ -30,25 +32,25 @@ class MyApp extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    return MaterialApp(
-      title: 'Tracubus',
-      theme: ThemeData(
-        primarySwatch: Colors.blue,
-      ),
-      localizationsDelegates: const [
-        AppLocalizations.delegate,
-        GlobalMaterialLocalizations.delegate,
-        GlobalWidgetsLocalizations.delegate,
-        GlobalCupertinoLocalizations.delegate,
-      ],
-      supportedLocales: const [
-        Locale('zh', ''),
-        Locale('en', ''),
-      ],
-      // TODO: This can be used to override system language settings
-      // locale: const Locale('zh'),
-      home: const MyHomePage(),
-    );
+    return Consumer<SettingsModel>(
+        builder: (context, settingsModel, child) => MaterialApp(
+              title: 'Tracubus',
+              theme: ThemeData(
+                primarySwatch: Colors.blue,
+              ),
+              localizationsDelegates: const [
+                AppLocalizations.delegate,
+                GlobalMaterialLocalizations.delegate,
+                GlobalWidgetsLocalizations.delegate,
+                GlobalCupertinoLocalizations.delegate,
+              ],
+              supportedLocales: const [
+                Locale('zh', ''),
+                Locale('en', ''),
+              ],
+              locale: settingsModel.locale,
+              home: const MyHomePage(),
+            ));
   }
 }
 
@@ -96,6 +98,8 @@ class _MyHomePageState extends State<MyHomePage> {
 
     // Fetch realtime location of buses
     registerBusLocUpdater();
+
+    Provider.of<SettingsModel>(context, listen: false).initLocale();
   }
 
   void registerBusLocUpdater() {

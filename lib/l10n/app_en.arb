@@ -1,6 +1,9 @@
 {
-    "helloWorld": "Hello World!",
-    "@helloWorld": {
-      "description": "The conventional newborn programmer greeting"
-    }
+    "systemLanguage": "System Default",
+
+    "others": "Others",
+    "settings": "Settings",
+    "language": "Language",
+    "about": "About",
+    "aboutTeam": "About our team"
 }
