@@ -1,6 +1,8 @@
 import 'dart:async';
 import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
+import 'package:flutter_gen/gen_l10n/app_localizations.dart';
+import 'package:flutter_localizations/flutter_localizations.dart';
 import 'package:http/http.dart' as http;
 import 'package:provider/provider.dart';
 import 'package:flutter_client_sse/flutter_client_sse.dart';
@@ -33,6 +35,18 @@ class MyApp extends StatelessWidget {
       theme: ThemeData(
         primarySwatch: Colors.blue,
       ),
+      localizationsDelegates: const [
+        AppLocalizations.delegate,
+        GlobalMaterialLocalizations.delegate,
+        GlobalWidgetsLocalizations.delegate,
+        GlobalCupertinoLocalizations.delegate,
+      ],
+      supportedLocales: const [
+        Locale('zh', ''),
+        Locale('en', ''),
+      ],
+      // TODO: This can be used to override system language settings
+      // locale: const Locale('zh'),
       home: const MyHomePage(),
     );
   }

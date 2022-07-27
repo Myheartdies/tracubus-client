@@ -1,3 +1,4 @@
+import 'package:flutter_gen/gen_l10n/app_localizations.dart';
 import 'package:flutter/material.dart';
 import 'about_page.dart';
 
@@ -10,7 +11,8 @@ class OthersPage extends StatelessWidget {
       appBar: AppBar(title: const Text('Others')),
       body: ListView(children: [
         ListTile(
-          title: const Text('About'),
+          title: Text(AppLocalizations.of(context)!.helloWorld +
+              AppLocalizations.of(context)!.localeName),
           onTap: () {
             Navigator.push(
               context,
