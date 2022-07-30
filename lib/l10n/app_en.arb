@@ -24,6 +24,7 @@
     "from": "From",
     "to": "To",
     "minute": "min",
+    "meter": "meter",
     "plural": "s",
     "arrived": "Arrived",
     "arrivingSoon": "Arriving soon",

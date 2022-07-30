@@ -206,18 +206,35 @@ class _ETAPageState extends State<ETAPage> {
             itemCount: stopList.length,
             itemBuilder: (context, index) {
               var stop = stopList[index];
+              String? distance;
+              if (_sortEnabled) {
+                var d = const Distance()
+                    .as(LengthUnit.Meter, stop.loc, LatLng(_lat, _lng))
+                    .ceil();
+                distance = d.toString() +
+                    ' ' +
+                    appLocalizations.meter +
+                    (d > 1 ? appLocalizations.plural : '');
+              }
               return Column(
                 crossAxisAlignment: CrossAxisAlignment.stretch,
                 children: [
                   Container(
-                    color: Colors.blue.shade100,
-                    padding: const EdgeInsets.all(8),
-                    child: Text(
-                      stop.name,
-                      style: textTheme.subtitle2,
-                      textAlign: TextAlign.start,
-                    ),
-                  ),
+                      color: Colors.blue.shade100,
+                      padding: const EdgeInsets.all(8),
+                      child: Row(children: [
+                        Text(
+                          stop.name,
+                          style: textTheme.subtitle2,
+                          textAlign: TextAlign.start,
+                        ),
+                        if (_sortEnabled) Expanded(child: Container()),
+                        if (_sortEnabled)
+                          Text(
+                            distance ?? '',
+                            style: textTheme.caption,
+                          ),
+                      ])),
                   if (stop.routes.isNotEmpty)
                     for (var route in stop.routes)
                       ListTile(
