@@ -63,24 +63,6 @@ class MyHomePage extends StatefulWidget {
 
 class _MyHomePageState extends State<MyHomePage> {
   int _selectedIndex = 0;
-  static const _bottomNavItems = [
-    BottomNavigationBarItem(
-      icon: Icon(CupertinoIcons.list_number_rtl),
-      label: 'Routes',
-    ),
-    BottomNavigationBarItem(
-      icon: Icon(CupertinoIcons.bus),
-      label: 'EAT',
-    ),
-    BottomNavigationBarItem(
-      icon: Icon(Icons.location_on),
-      label: 'Search',
-    ),
-    BottomNavigationBarItem(
-      icon: Icon(Icons.more_horiz),
-      label: 'Others',
-    ),
-  ];
 
   void _onItemTapped(int index) {
     setState(() {
@@ -170,6 +152,26 @@ class _MyHomePageState extends State<MyHomePage> {
 
   @override
   Widget build(BuildContext context) {
+    var appLocalizations = AppLocalizations.of(context)!;
+    var _bottomNavItems = [
+      BottomNavigationBarItem(
+        icon: const Icon(CupertinoIcons.list_number_rtl),
+        label: appLocalizations.busRoutes,
+      ),
+      BottomNavigationBarItem(
+        icon: const Icon(CupertinoIcons.bus),
+        label: appLocalizations.arrivalTime,
+      ),
+      BottomNavigationBarItem(
+        icon: const Icon(Icons.location_on),
+        label: appLocalizations.searchRoutes,
+      ),
+      BottomNavigationBarItem(
+        icon: const Icon(Icons.more_horiz),
+        label: appLocalizations.others,
+      ),
+    ];
+
     return Scaffold(
       body: Center(
           child: IndexedStack(

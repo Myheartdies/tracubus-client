@@ -1,6 +1,7 @@
 import 'dart:async';
 
 import 'package:flutter/material.dart';
+import 'package:flutter_gen/gen_l10n/app_localizations.dart';
 import 'package:provider/provider.dart';
 import 'package:latlong2/latlong.dart';
 import 'dart:math';
@@ -33,7 +34,7 @@ class _ETAPageState extends State<ETAPage> {
     });
   }
 
-  Future<LocationData?> _checkLocation() async {
+  Future<LocationData?> _checkLocation(BuildContext context) async {
     Location location = Location();
 
     bool _serviceEnabled = await location.serviceEnabled();
@@ -46,10 +47,10 @@ class _ETAPageState extends State<ETAPage> {
     }
     PermissionStatus _permissionGranted = await location.hasPermission();
     if (_permissionGranted == PermissionStatus.denied) {
-      await _requestHint();
+      await _requestHint(context);
       _permissionGranted = await location.requestPermission();
       if (_permissionGranted != PermissionStatus.granted) {
-        await _requestFailedHint();
+        await _requestFailedHint(context);
         return null;
       }
     }
@@ -57,21 +58,21 @@ class _ETAPageState extends State<ETAPage> {
     return await location.getLocation();
   }
 
-  Future<void> _requestHint() {
+  Future<void> _requestHint(BuildContext context) {
+    var appLocalizations = AppLocalizations.of(context)!;
     return showDialog<void>(
       context: context,
       barrierDismissible: false,
       builder: (context) {
         return AlertDialog(
-          title: const Text('Permission request'),
-          content: const Text(
-              'To list bus stops in distance order, we need your permission to access your current location.'),
+          title: Text(appLocalizations.permissionRequest),
+          content: Text(appLocalizations.locationRequestDesp),
           actions: [
             TextButton(
               onPressed: () {
                 Navigator.of(context).pop();
               },
-              child: const Text('OK'),
+              child: Text(appLocalizations.ok),
             )
           ],
         );
@@ -79,20 +80,20 @@ class _ETAPageState extends State<ETAPage> {
     );
   }
 
-  Future<void> _requestFailedHint() {
+  Future<void> _requestFailedHint(BuildContext context) {
+    var appLocalizations = AppLocalizations.of(context)!;
     return showDialog<void>(
       context: context,
       builder: (context) {
         return AlertDialog(
-          title: const Text('Error'),
-          content: const Text(
-              'Failed to get location permission. Please check your system permission settings.'),
+          title: Text(appLocalizations.error),
+          content: Text(appLocalizations.locationPermissionErr),
           actions: [
             TextButton(
               onPressed: () {
                 Navigator.of(context).pop();
               },
-              child: const Text('OK'),
+              child: Text(appLocalizations.ok),
             )
           ],
         );
@@ -102,14 +103,15 @@ class _ETAPageState extends State<ETAPage> {
 
   @override
   Widget build(BuildContext context) {
+    var appLocalizations = AppLocalizations.of(context)!;
     return Scaffold(
       appBar: AppBar(
-        title: const Text('Arrival Time'),
+        title: Text(appLocalizations.arrivalTime),
         actions: [
           IconButton(
             onPressed: () {
               if (!_sortEnabled) {
-                _checkLocation().then((data) {
+                _checkLocation(context).then((data) {
                   if (data != null &&
                       data.latitude != null &&
                       data.longitude != null) {
@@ -134,12 +136,10 @@ class _ETAPageState extends State<ETAPage> {
           builder: (context, infoModel, locationModel, child) {
         var _busInfo = infoModel.busInfo;
         if (infoModel.errorOccured) {
-          return const Center(
-            child: Text('Error: Server returns invalid data.'),
-          );
+          return Center(child: Text(appLocalizations.fetchError));
         } else if (_busInfo == null) {
-          return const Center(
-            child: Text('Fetching data...'),
+          return Center(
+            child: Text(appLocalizations.fetching),
           );
         }
 
@@ -198,7 +198,7 @@ class _ETAPageState extends State<ETAPage> {
             Container(
                 padding: const EdgeInsets.all(12),
                 child: Text(
-                  "Hint: click the icon at top-right corner to find stations close to you",
+                  appLocalizations.sortHint,
                   style: textTheme.caption,
                 )),
           Expanded(
@@ -223,7 +223,8 @@ class _ETAPageState extends State<ETAPage> {
                       ListTile(
                         title: Text(route.id),
                         subtitle: Text(route.name),
-                        trailing: Text(route.timeString),
+                        trailing: Text(BusInfoModel.timeToString(
+                            route.time, appLocalizations)),
                         onTap: () => Navigator.push(
                           context,
                           MaterialPageRoute(
@@ -236,7 +237,7 @@ class _ETAPageState extends State<ETAPage> {
                     Container(
                         padding: const EdgeInsets.all(12),
                         child: Text(
-                          "No bus arriving",
+                          appLocalizations.noBusArriving,
                           style: textTheme.caption,
                           textAlign: TextAlign.start,
                         ))
@@ -273,9 +274,6 @@ class Route {
   final String id;
   final String name;
   final int time;
-  String get timeString {
-    return BusInfoModel.timeToString(time);
-  }
 
   Route(this.id, this.name, this.time);
 }

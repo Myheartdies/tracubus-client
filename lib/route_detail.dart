@@ -1,11 +1,12 @@
 import 'package:collection/collection.dart';
-import 'package:flutter/material.dart';
-import 'package:flutter_map/plugin_api.dart';
-import 'package:provider/provider.dart';
-import 'package:flutter_map/flutter_map.dart';
-import 'package:scrollable_positioned_list/scrollable_positioned_list.dart';
-import 'package:latlong2/latlong.dart';
 import 'package:flutter/cupertino.dart';
+import 'package:flutter/material.dart';
+import 'package:flutter_gen/gen_l10n/app_localizations.dart';
+import 'package:flutter_map/plugin_api.dart';
+import 'package:flutter_map/flutter_map.dart';
+import 'package:latlong2/latlong.dart';
+import 'package:provider/provider.dart';
+import 'package:scrollable_positioned_list/scrollable_positioned_list.dart';
 
 import 'businfo.dart';
 import 'businfo_model.dart';
@@ -29,6 +30,8 @@ class _RouteDetailState extends State<RouteDetail>
   Widget build(BuildContext context) {
     return Consumer2<BusInfoModel, BusLocationModel>(
         builder: (context, infoModel, locationModel, child) {
+      var appLocalizations = AppLocalizations.of(context)!;
+
       var _busInfo = infoModel.busInfo;
       var routeId = widget.routeId;
       var route = _busInfo?.routes[routeId];
@@ -41,10 +44,7 @@ class _RouteDetailState extends State<RouteDetail>
 
       if (_busInfo == null || route == null || route.pieces.isEmpty) {
         hint = Expanded(
-          child: Center(
-            child: Text(
-                'Route "$routeId" does not exist, or the route is invalid.'),
-          ),
+          child: Center(child: Text(appLocalizations.invalidRoute)),
         );
       } else {
         // Real-time locations of buses
@@ -139,6 +139,16 @@ class _RouteDetailState extends State<RouteDetail>
                       anchorPos: AnchorPos.exactly(Anchor(22, 15)),
                       builder: (ctx) => GestureDetector(
                         onTap: () {
+                          if (bus.stop < 0 || bus.stop >= route.pieces.length) {
+                            // Which means this bus is out of operation
+                            var snackBar = SnackBar(
+                              content: Text(appLocalizations.outOfOperation),
+                              duration: const Duration(seconds: 2),
+                            );
+                            ScaffoldMessenger.of(context)
+                                .showSnackBar(snackBar);
+                            return;
+                          }
                           setState(() {
                             selectedBusId = bus.id;
                           });
@@ -191,8 +201,8 @@ class _RouteDetailState extends State<RouteDetail>
                   trailing: Text(
                     _selectedBus == null
                         ? ''
-                        : BusInfoModel.timeString(
-                            stop.stop, _selectedBus, _busInfo),
+                        : BusInfoModel.timeString(stop.stop, _selectedBus,
+                            _busInfo, appLocalizations),
                   ),
                   onTap: () {
                     if (allStops.containsKey(stop.stop)) {

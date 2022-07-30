@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:flutter_gen/gen_l10n/app_localizations.dart';
 import 'package:provider/provider.dart';
 
 import 'package:awesome_select/awesome_select.dart';
@@ -18,19 +19,21 @@ class _RouteSuggestState extends State<RouteSuggest> {
   var _srcStopName = '', _destStopName = '';
   @override
   Widget build(BuildContext context) {
+    var appLocalizations = AppLocalizations.of(context)!;
+
     return Scaffold(
       appBar: AppBar(
-        title: const Text("Search Routes"),
+        title: Text(appLocalizations.searchRoutes),
       ),
       body: Consumer<BusInfoModel>(builder: (context, infoModel, child) {
         var _busInfo = infoModel.busInfo;
         if (infoModel.errorOccured) {
-          return const Center(
-            child: Text('Error: Server returns invalid data.'),
+          return Center(
+            child: Text(appLocalizations.fetchError),
           );
         } else if (_busInfo == null) {
-          return const Center(
-            child: Text('Fetching data...'),
+          return Center(
+            child: Text(appLocalizations.fetching),
           );
         }
 
@@ -56,7 +59,7 @@ class _RouteSuggestState extends State<RouteSuggest> {
           Column(
             children: [
               SmartSelect<String>.single(
-                title: 'From',
+                title: appLocalizations.from,
                 selectedValue: _srcStopName,
                 choiceItems: stopList,
                 onChange: (selected) =>
@@ -65,7 +68,7 @@ class _RouteSuggestState extends State<RouteSuggest> {
                 tileBuilder: (context, state) => ListTile(
                   leading: Column(
                     mainAxisAlignment: MainAxisAlignment.center,
-                    children: const [Text('From')],
+                    children: [Text(appLocalizations.from)],
                   ),
                   title: Text(state.selected?.choice?.title ?? ''),
                   onTap: state.showModal,
@@ -73,7 +76,7 @@ class _RouteSuggestState extends State<RouteSuggest> {
               ),
               const Divider(),
               SmartSelect<String>.single(
-                title: 'To',
+                title: appLocalizations.to,
                 selectedValue: _destStopName,
                 choiceItems: stopList,
                 onChange: (selected) =>
@@ -82,7 +85,7 @@ class _RouteSuggestState extends State<RouteSuggest> {
                 tileBuilder: (context, state) => ListTile(
                   leading: Column(
                     mainAxisAlignment: MainAxisAlignment.center,
-                    children: const [Text('To')],
+                    children: [Text(appLocalizations.to)],
                   ),
                   title: Text(state.selected?.choice?.title ?? ''),
                   onTap: state.showModal,
@@ -110,7 +113,10 @@ class _RouteSuggestState extends State<RouteSuggest> {
                     child: ListTile(
                         title: Text(route.routeId),
                         subtitle: Text(route.route.name),
-                        trailing: Text(route.timeString),
+                        trailing: Text(route.duration +
+                            ' ' +
+                            appLocalizations.minute +
+                            (route.plural ? appLocalizations.plural : '')),
                         onTap: () {
                           Navigator.push(
                             context,
@@ -135,11 +141,16 @@ class RouteResult {
 
   RouteResult(this.routeId, this.route, this.time);
 
-  String get timeString {
+  /// In minutes
+  String get duration {
     if (time < 30) {
-      return '0.5 min';
+      return '0.5';
     } else {
-      return '${(time + 30) ~/ 60} min';
+      return ((time + 30) ~/ 60).toString();
     }
+  }
+
+  bool get plural {
+    return (time + 30) ~/ 60 > 1;
   }
 }
