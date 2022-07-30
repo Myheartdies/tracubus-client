@@ -1,6 +1,8 @@
 import 'dart:async';
 import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
+import 'package:flutter_gen/gen_l10n/app_localizations.dart';
+import 'package:flutter_localizations/flutter_localizations.dart';
 import 'package:http/http.dart' as http;
 import 'package:provider/provider.dart';
 import 'package:flutter_client_sse/flutter_client_sse.dart';
@@ -10,6 +12,7 @@ import 'eta_page.dart';
 import 'route_suggestion.dart';
 import 'others_page.dart';
 import 'businfo_model.dart';
+import 'settings_model.dart';
 
 void main() {
   runApp(
@@ -17,6 +20,7 @@ void main() {
       providers: [
         ChangeNotifierProvider(create: (context) => BusLocationModel()),
         ChangeNotifierProvider(create: (context) => BusInfoModel()),
+        ChangeNotifierProvider(create: (context) => SettingsModel()),
       ],
       child: const MyApp(),
     ),
@@ -28,13 +32,25 @@ class MyApp extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    return MaterialApp(
-      title: 'Tracubus',
-      theme: ThemeData(
-        primarySwatch: Colors.blue,
-      ),
-      home: const MyHomePage(),
-    );
+    return Consumer<SettingsModel>(
+        builder: (context, settingsModel, child) => MaterialApp(
+              title: 'Tracubus',
+              theme: ThemeData(
+                primarySwatch: Colors.blue,
+              ),
+              localizationsDelegates: const [
+                AppLocalizations.delegate,
+                GlobalMaterialLocalizations.delegate,
+                GlobalWidgetsLocalizations.delegate,
+                GlobalCupertinoLocalizations.delegate,
+              ],
+              supportedLocales: const [
+                Locale('zh', ''),
+                Locale('en', ''),
+              ],
+              locale: settingsModel.locale,
+              home: const MyHomePage(),
+            ));
   }
 }
 
@@ -47,24 +63,6 @@ class MyHomePage extends StatefulWidget {
 
 class _MyHomePageState extends State<MyHomePage> {
   int _selectedIndex = 0;
-  static const _bottomNavItems = [
-    BottomNavigationBarItem(
-      icon: Icon(CupertinoIcons.list_number_rtl),
-      label: 'Routes',
-    ),
-    BottomNavigationBarItem(
-      icon: Icon(CupertinoIcons.bus),
-      label: 'EAT',
-    ),
-    BottomNavigationBarItem(
-      icon: Icon(Icons.location_on),
-      label: 'Search',
-    ),
-    BottomNavigationBarItem(
-      icon: Icon(Icons.more_horiz),
-      label: 'Others',
-    ),
-  ];
 
   void _onItemTapped(int index) {
     setState(() {
@@ -82,6 +80,8 @@ class _MyHomePageState extends State<MyHomePage> {
 
     // Fetch realtime location of buses
     registerBusLocUpdater();
+
+    Provider.of<SettingsModel>(context, listen: false).initLocale();
   }
 
   void registerBusLocUpdater() {
@@ -152,6 +152,26 @@ class _MyHomePageState extends State<MyHomePage> {
 
   @override
   Widget build(BuildContext context) {
+    var appLocalizations = AppLocalizations.of(context)!;
+    var _bottomNavItems = [
+      BottomNavigationBarItem(
+        icon: const Icon(CupertinoIcons.list_number_rtl),
+        label: appLocalizations.busRoutes,
+      ),
+      BottomNavigationBarItem(
+        icon: const Icon(CupertinoIcons.bus),
+        label: appLocalizations.arrivalTime,
+      ),
+      BottomNavigationBarItem(
+        icon: const Icon(Icons.location_on),
+        label: appLocalizations.searchRoutes,
+      ),
+      BottomNavigationBarItem(
+        icon: const Icon(Icons.more_horiz),
+        label: appLocalizations.others,
+      ),
+    ];
+
     return Scaffold(
       body: Center(
           child: IndexedStack(

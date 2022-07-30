@@ -1,0 +1,32 @@
+{
+    "ok": "OK",
+    "error": "Error",
+    "systemLanguage": "System Default",
+    "fetching": "Updating bus infomation...",
+    "fetchError": "Error: Server returns invalid data.",
+    "permissionRequest": "Permission Request",
+    "locationRequestDesp": "To list bus stops in distance order, we need your permission to access your current location.",
+    "locationPermissionErr": "Failed to get location permission. Please check your system permission settings.",
+
+    "others": "Others",
+    "settings": "Settings",
+    "language": "Language",
+    "about": "About",
+    "aboutTeam": "About our team",
+
+    "busRoutes": "Route List",
+
+    "arrivalTime": "Arrival Time",
+    "sortHint": "Tips: tap the icon at the top-right corner to find stations close to you.",
+    "noBusArriving": "No bus arriving",
+
+    "searchRoutes": "Search Routes",
+    "from": "From",
+    "to": "To",
+    "minute": "min",
+    "plural": "s",
+    "arrived": "Arrived",
+    "arrivingSoon": "Arriving soon",
+    "outOfOperation": "This bus has not yet started or already reached end station.",
+    "invalidRoute": "Route does not exist or is invalid."
+}

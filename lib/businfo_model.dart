@@ -2,6 +2,7 @@ import 'dart:convert';
 import 'dart:math';
 
 import 'package:flutter/foundation.dart';
+import 'package:flutter_gen/gen_l10n/app_localizations.dart';
 import 'businfo.dart';
 
 /// This model extends ChangeNotifier and holds infomation fetched from server
@@ -87,9 +88,10 @@ class BusInfoModel extends ChangeNotifier {
     return true;
   }
 
-  static String timeString(String stopId, BusLocation bus, BusInfo busInfo) {
+  static String timeString(String stopId, BusLocation bus, BusInfo busInfo,
+      AppLocalizations appLocalizations) {
     int time = estimatedTime(stopId, bus, busInfo);
-    return timeToString(time);
+    return timeToString(time, appLocalizations);
   }
 
   /// returns the time left for the bus to reach this stop
@@ -116,15 +118,19 @@ class BusInfoModel extends ChangeNotifier {
     }
   }
 
-  static String timeToString(int time) {
+  static String timeToString(int time, AppLocalizations appLocalizations) {
     if (time < 0) {
       return '-';
     } else if (time < 5) {
-      return 'Arrived';
+      return appLocalizations.arrived;
     } else if (time < 60) {
-      return 'Arriving soon';
+      return appLocalizations.arrivingSoon;
     } else {
-      return '${time ~/ 60} min';
+      var t = time ~/ 60;
+      return t.toString() +
+          ' ' +
+          appLocalizations.minute +
+          (t > 1 ? appLocalizations.plural : '');
     }
   }
 }

@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:flutter_gen/gen_l10n/app_localizations.dart';
 import 'package:provider/provider.dart';
 
 import 'route_detail.dart';
@@ -14,24 +15,26 @@ class RoutePage extends StatefulWidget {
 class _RoutePageState extends State<RoutePage> {
   @override
   Widget build(BuildContext context) {
+    var appLocalizations = AppLocalizations.of(context)!;
+
     return Scaffold(
       appBar: AppBar(
-        title: const Text('Bus Routes'),
+        title: Text(appLocalizations.busRoutes),
       ),
-      body: _buildList(),
+      body: _buildList(appLocalizations),
     );
   }
 
-  Widget _buildList() {
+  Widget _buildList(AppLocalizations appLocalizations) {
     return Consumer<BusInfoModel>(builder: (context, infoModel, child) {
       var _routes = infoModel.busInfo?.routes;
       if (infoModel.errorOccured) {
-        return const Center(
-          child: Text('Error: Server returns invalid data.'),
+        return Center(
+          child: Text(appLocalizations.fetchError),
         );
       } else if (_routes == null) {
-        return const Center(
-          child: Text('Fetching data...'),
+        return Center(
+          child: Text(appLocalizations.fetching),
         );
       } else {
         return ListView.builder(
