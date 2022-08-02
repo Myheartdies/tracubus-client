@@ -23,6 +23,7 @@
     "searchRoutes": "Search Routes",
     "from": "From",
     "to": "To",
+    "ett": "Transit duration",
     "minute": "min",
     "meter": "meter",
     "plural": "s",

@@ -144,10 +144,20 @@ class _RouteSuggestState extends State<RouteSuggest> {
                     child: ListTile(
                         title: Text(route.routeId),
                         subtitle: Text(routeName),
-                        trailing: Text(route.duration +
-                            ' ' +
-                            appLocalizations.minute +
-                            (route.plural ? appLocalizations.plural : '')),
+                        trailing: Column(
+                          mainAxisAlignment: MainAxisAlignment.spaceEvenly,
+                          crossAxisAlignment: CrossAxisAlignment.end,
+                          children: [
+                            Text(
+                              appLocalizations.ett,
+                              style: Theme.of(context).textTheme.caption,
+                            ),
+                            Text(route.duration +
+                                ' ' +
+                                appLocalizations.minute +
+                                (route.plural ? appLocalizations.plural : ''))
+                          ],
+                        ),
                         onTap: () {
                           Navigator.push(
                             context,
