@@ -13,7 +13,17 @@ import 'businfo_model.dart';
 
 class RouteDetail extends StatefulWidget {
   final String routeId;
-  const RouteDetail({Key? key, required this.routeId}) : super(key: key);
+  final BusInfo busInfo;
+  final String? startStopId;
+  final String? endStopId;
+
+  const RouteDetail(
+      {Key? key,
+      required this.routeId,
+      required this.busInfo,
+      this.startStopId,
+      this.endStopId})
+      : super(key: key);
 
   @override
   _RouteDetailState createState() => _RouteDetailState();
@@ -22,21 +32,43 @@ class RouteDetail extends StatefulWidget {
 class _RouteDetailState extends State<RouteDetail>
     with TickerProviderStateMixin {
   String? selectedBusId;
-  BusLocation? selectedBusLocation;
+  BusRoute? _route;
+
   final MapController mapController = MapController();
   final ItemScrollController itemScrollController = ItemScrollController();
 
   @override
+  void initState() {
+    super.initState();
+    setState(() {
+      _route = widget.busInfo.routes[widget.routeId];
+    });
+
+    WidgetsBinding.instance?.addPostFrameCallback((timeStamp) {
+      if (widget.startStopId != null && widget.endStopId != null) {
+        var stop = _route?.pieces
+            .firstWhere((piece) => piece.stop == widget.startStopId);
+        if (stop != null) {
+          var index = _route?.pieces.indexOf(stop);
+          if (index != null) {
+            itemScrollController.scrollTo(
+                index: index, duration: const Duration(milliseconds: 500));
+          }
+        }
+      }
+    });
+  }
+
+  @override
   Widget build(BuildContext context) {
-    return Consumer2<BusInfoModel, BusLocationModel>(
-        builder: (context, infoModel, locationModel, child) {
+    return Consumer<BusLocationModel>(builder: (context, locationModel, child) {
       var appLocalizations = AppLocalizations.of(context)!;
       var currentLocale = Localizations.localeOf(context);
       var localeKey = BusInfoModel.locale2Key(currentLocale);
 
-      var _busInfo = infoModel.busInfo;
+      var _busInfo = widget.busInfo;
       var routeId = widget.routeId;
-      var route = _busInfo?.routes[routeId];
+      var route = _route;
       String? routeName;
 
       Widget? map, details, hint;
@@ -45,12 +77,12 @@ class _RouteDetailState extends State<RouteDetail>
       // 1. No error: map and details are shown;
       // 2. Some error occured: only hint is shown.
 
-      if (_busInfo == null || route == null || route.pieces.isEmpty) {
+      if (route == null || route.pieces.isEmpty) {
         hint = Expanded(
           child: Center(child: Text(appLocalizations.invalidRoute)),
         );
       } else {
-        var strings = _busInfo.strings;
+        var strings = widget.busInfo.strings;
         routeName = strings[localeKey]?.route[routeId]?.name;
 
         // Real-time locations of buses
@@ -59,11 +91,10 @@ class _RouteDetailState extends State<RouteDetail>
                 .toList() ??
             const <BusLocation>[];
 
-        selectedBusLocation = selectedBusId == null
+        var _selectedBusLocation = selectedBusId == null
             ? null
             : _busLocations
                 .firstWhereOrNull((element) => element.id == selectedBusId);
-        var _selectedBus = selectedBusLocation;
 
         // For drawing buses
         List<LatLng> stopsLatLng = [];
@@ -95,9 +126,9 @@ class _RouteDetailState extends State<RouteDetail>
             gradientColors: [
               // When a bus is selected, the passed routes will
               // be shown in a lighter color
-              _selectedBus == null
+              _selectedBusLocation == null
                   ? activeColor
-                  : (_selectedBus.stop <= i ? activeColor : inactiveColor),
+                  : (_selectedBusLocation.stop <= i ? activeColor : inactiveColor),
             ],
           );
           routePolyLines.add(line);
@@ -198,19 +229,28 @@ class _RouteDetailState extends State<RouteDetail>
                 var stop = route.pieces[i];
                 var stopName =
                     _busInfo.strings[localeKey]?.stationName[stop.stop] ?? '';
+                String? subtitle;
+                if (stop.stop == widget.startStopId) {
+                  subtitle = appLocalizations.from;
+                } else if (stop.stop == widget.endStopId) {
+                  subtitle = appLocalizations.to;
+                }
 
                 return ListTile(
-                  selected:
-                      _selectedBus == null ? false : _selectedBus.stop + 1 == i,
-                  enabled:
-                      _selectedBus == null ? true : _selectedBus.stop + 1 <= i,
+                  selected: _selectedBusLocation == null
+                      ? false
+                      : _selectedBusLocation.stop + 1 == i,
+                  enabled: _selectedBusLocation == null
+                      ? true
+                      : _selectedBusLocation.stop + 1 <= i,
                   // TODO: Change the icon
                   leading: const Icon(Icons.circle_outlined),
                   title: Text(stopName),
+                  subtitle: subtitle == null ? null : Text(subtitle),
                   trailing: Text(
-                    _selectedBus == null
+                    _selectedBusLocation == null
                         ? ''
-                        : BusInfoModel.timeString(stop.stop, _selectedBus,
+                        : BusInfoModel.timeString(stop.stop, _selectedBusLocation,
                             _busInfo, appLocalizations),
                   ),
                   onTap: () {

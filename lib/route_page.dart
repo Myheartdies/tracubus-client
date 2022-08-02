@@ -62,6 +62,7 @@ class _RoutePageState extends State<RoutePage> {
                   MaterialPageRoute(
                       builder: (context) => RouteDetail(
                             routeId: route.key,
+                            busInfo: _busInfo,
                           )),
                 );
               },

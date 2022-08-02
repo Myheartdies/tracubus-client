@@ -162,8 +162,12 @@ class _RouteSuggestState extends State<RouteSuggest> {
                           Navigator.push(
                             context,
                             MaterialPageRoute(
-                                builder: (context) =>
-                                    RouteDetail(routeId: route.routeId)),
+                                builder: (context) => RouteDetail(
+                                      routeId: route.routeId,
+                                      busInfo: _busInfo,
+                                      startStopId: _srcStopId,
+                                      endStopId: _destStopId,
+                                    )),
                           );
                         }),
                   );

@@ -245,17 +245,18 @@ class _ETAPageState extends State<ETAPage> {
                   if (stop.routes.isNotEmpty)
                     for (var route in stop.routes)
                       ListTile(
-                        title: Text(route.id),
-                        subtitle: Text(route.name),
-                        trailing: Text(BusInfoModel.timeToString(
-                            route.time, appLocalizations)),
-                        onTap: () => Navigator.push(
-                          context,
-                          MaterialPageRoute(
-                              builder: (context) =>
-                                  RouteDetail(routeId: route.id)),
-                        ),
-                      ),
+                          title: Text(route.id),
+                          subtitle: Text(route.name),
+                          trailing: Text(BusInfoModel.timeToString(
+                              route.time, appLocalizations)),
+                          onTap: () => Navigator.push(
+                              context,
+                              MaterialPageRoute(
+                                builder: (context) => RouteDetail(
+                                  routeId: route.id,
+                                  busInfo: _busInfo,
+                                ),
+                              ))),
                   // Add a placeholder when routes are empty
                   if (stop.routes.isEmpty)
                     Container(

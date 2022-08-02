@@ -21,8 +21,8 @@
     "noBusArriving": "No bus arriving",
 
     "searchRoutes": "Search Routes",
-    "from": "From",
-    "to": "To",
+    "from": "Start",
+    "to": "End",
     "ett": "Transit duration",
     "minute": "min",
     "meter": "meter",
