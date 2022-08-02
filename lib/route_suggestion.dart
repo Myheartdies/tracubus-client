@@ -20,6 +20,8 @@ class _RouteSuggestState extends State<RouteSuggest> {
   @override
   Widget build(BuildContext context) {
     var appLocalizations = AppLocalizations.of(context)!;
+    var currentLocale = Localizations.localeOf(context);
+    var localeKey = BusInfoModel.locale2Key(currentLocale);
 
     return Scaffold(
       appBar: AppBar(
@@ -108,6 +110,9 @@ class _RouteSuggestState extends State<RouteSuggest> {
                 itemCount: routeResults.length,
                 itemBuilder: (context, index) {
                   RouteResult route = routeResults[index];
+                  var routeName =
+                      _busInfo.strings[localeKey]?.route[route.routeId]?.name ??
+                          '';
                   return Container(
                     decoration: BoxDecoration(
                       border: Border(
@@ -118,7 +123,7 @@ class _RouteSuggestState extends State<RouteSuggest> {
                     ),
                     child: ListTile(
                         title: Text(route.routeId),
-                        subtitle: Text(route.route.name),
+                        subtitle: Text(routeName),
                         trailing: Text(route.duration +
                             ' ' +
                             appLocalizations.minute +

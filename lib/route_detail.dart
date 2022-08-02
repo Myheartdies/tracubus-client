@@ -31,10 +31,13 @@ class _RouteDetailState extends State<RouteDetail>
     return Consumer2<BusInfoModel, BusLocationModel>(
         builder: (context, infoModel, locationModel, child) {
       var appLocalizations = AppLocalizations.of(context)!;
+      var currentLocale = Localizations.localeOf(context);
+      var localeKey = BusInfoModel.locale2Key(currentLocale);
 
       var _busInfo = infoModel.busInfo;
       var routeId = widget.routeId;
       var route = _busInfo?.routes[routeId];
+      String? routeName;
 
       Widget? map, details, hint;
 
@@ -47,6 +50,9 @@ class _RouteDetailState extends State<RouteDetail>
           child: Center(child: Text(appLocalizations.invalidRoute)),
         );
       } else {
+        var strings = _busInfo.strings;
+        routeName = strings[localeKey]?.route[routeId]?.name;
+
         // Real-time locations of buses
         var _busLocations = locationModel.busLocations
                 ?.where((e) => e.route == routeId)
@@ -216,7 +222,7 @@ class _RouteDetailState extends State<RouteDetail>
       }
 
       return Scaffold(
-        appBar: AppBar(title: Text(route?.name ?? '')),
+        appBar: AppBar(title: Text(routeName ?? '')),
         body: Column(
           crossAxisAlignment: CrossAxisAlignment.start,
           children: [

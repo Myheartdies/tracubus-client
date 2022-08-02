@@ -27,25 +27,35 @@ class _RoutePageState extends State<RoutePage> {
 
   Widget _buildList(AppLocalizations appLocalizations) {
     return Consumer<BusInfoModel>(builder: (context, infoModel, child) {
-      var _routes = infoModel.busInfo?.routes;
+      var currentLocale = Localizations.localeOf(context);
+      var localeKey = BusInfoModel.locale2Key(currentLocale);
+
+      var _busInfo = infoModel.busInfo;
+
       if (infoModel.errorOccured) {
         return Center(
           child: Text(appLocalizations.fetchError),
         );
-      } else if (_routes == null) {
+      } else if (_busInfo == null) {
         return Center(
           child: Text(appLocalizations.fetching),
         );
       } else {
+        var _routes = _busInfo.routes;
+        var _strings = _busInfo.strings;
+
         return ListView.builder(
           itemCount: _routes.entries.length * 2,
           itemBuilder: (context, i) {
             if (i.isOdd) return const Divider();
             final index = i ~/ 2;
             var route = _routes.entries.elementAt(index);
+
+            var routeName = _strings[localeKey]?.route[route.key]?.name ?? '';
+
             return ListTile(
               title: Text(route.key),
-              subtitle: Text(route.value.name),
+              subtitle: Text(routeName),
               onTap: () {
                 Navigator.push(
                   context,

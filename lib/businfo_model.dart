@@ -2,6 +2,7 @@ import 'dart:convert';
 import 'dart:math';
 
 import 'package:flutter/foundation.dart';
+import 'package:flutter/widgets.dart';
 import 'package:flutter_gen/gen_l10n/app_localizations.dart';
 import 'businfo.dart';
 
@@ -85,7 +86,18 @@ class BusInfoModel extends ChangeNotifier {
       }
     }
 
+    for (var locale in AppLocalizations.supportedLocales) {
+      if (!busInfo.strings.keys.contains(locale2Key(locale))) return false;
+    }
+
     return true;
+  }
+
+  static String locale2Key(Locale locale) {
+    return locale.languageCode +
+        (locale.countryCode == null || locale.countryCode == ''
+            ? ''
+            : '-' + locale.countryCode!);
   }
 
   static String timeString(String stopId, BusLocation bus, BusInfo busInfo,

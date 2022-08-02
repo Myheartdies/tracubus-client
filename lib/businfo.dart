@@ -5,8 +5,6 @@ part 'businfo.g.dart';
 @JsonSerializable()
 class BusRoute {
   BusRoute(
-    this.name,
-    this.info,
     this.departure,
     this.pieces,
     this.avgTime,
@@ -15,12 +13,6 @@ class BusRoute {
     this.minLng,
     this.maxLng,
   );
-
-  @JsonKey(required: true)
-  final String name;
-
-  @JsonKey(required: true)
-  final String info;
 
   @JsonKey(required: true)
   final List<int> departure;
@@ -74,7 +66,7 @@ class StopInRoute {
 
 @JsonSerializable()
 class BusInfo {
-  BusInfo(this.points, this.segments, this.stops, this.routes);
+  BusInfo(this.points, this.segments, this.stops, this.routes, this.strings);
 
   /// points[idx] == [lat, lng]
   @JsonKey(required: true)
@@ -89,12 +81,47 @@ class BusInfo {
   final Map<String, int> stops;
 
   @JsonKey(required: true)
+  final Map<String, LanguageString> strings;
+
+  @JsonKey(required: true)
   final Map<String, BusRoute> routes;
 
   factory BusInfo.fromJson(Map<String, dynamic> json) =>
       _$BusInfoFromJson(json);
 
   Map<String, dynamic> toJson() => _$BusInfoToJson(this);
+}
+
+@JsonSerializable()
+class RouteString {
+  RouteString(this.name, this.info);
+
+  @JsonKey(required: true)
+  final String name;
+
+  @JsonKey(required: true)
+  final String info;
+
+  factory RouteString.fromJson(Map<String, dynamic> json) =>
+      _$RouteStringFromJson(json);
+
+  Map<String, dynamic> toJson() => _$RouteStringToJson(this);
+}
+
+@JsonSerializable()
+class LanguageString {
+  LanguageString(this.stationName, this.route);
+
+  @JsonKey(required: true)
+  final Map<String, String> stationName;
+
+  @JsonKey(required: true)
+  final Map<String, RouteString> route;
+
+  factory LanguageString.fromJson(Map<String, dynamic> json) =>
+      _$LanguageStringFromJson(json);
+
+  Map<String, dynamic> toJson() => _$LanguageStringToJson(this);
 }
 
 @JsonSerializable()

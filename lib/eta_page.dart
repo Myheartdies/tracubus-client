@@ -104,6 +104,9 @@ class _ETAPageState extends State<ETAPage> {
   @override
   Widget build(BuildContext context) {
     var appLocalizations = AppLocalizations.of(context)!;
+    var currentLocale = Localizations.localeOf(context);
+    var localeKey = BusInfoModel.locale2Key(currentLocale);
+
     return Scaffold(
       appBar: AppBar(
         title: Text(appLocalizations.arrivalTime),
@@ -156,8 +159,11 @@ class _ETAPageState extends State<ETAPage> {
             stops.forEach((key, stop) {
               var time = BusInfoModel.estimatedTime(stop.name, bus, _busInfo);
               if (time >= 0) {
-                stop.routes.add(Route(
-                    bus.route, _busInfo.routes[bus.route]?.name ?? '', time));
+                var routeId = bus.route;
+                var routeName =
+                    _busInfo.strings[localeKey]?.route[routeId]?.name ?? '';
+                var route = Route(routeId, routeName, time);
+                stop.routes.add(route);
               }
             });
           }
@@ -168,9 +174,9 @@ class _ETAPageState extends State<ETAPage> {
           if (stops.containsKey(firstStop)) {
             int time = calculateTimeForFirstStop(route.value, _now);
             if (time >= 0) {
-              stops[firstStop]!
-                  .routes
-                  .add(Route(route.key, route.value.name, time));
+              var routeName =
+                  _busInfo.strings[localeKey]?.route[route.key]?.name ?? '';
+              stops[firstStop]!.routes.add(Route(route.key, routeName, time));
             }
           }
         }
