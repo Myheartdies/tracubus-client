@@ -16,7 +16,8 @@ class RouteSuggest extends StatefulWidget {
 }
 
 class _RouteSuggestState extends State<RouteSuggest> {
-  var _srcStopName = '', _destStopName = '';
+  var _srcStopId = '', _destStopId = '';
+
   @override
   Widget build(BuildContext context) {
     var appLocalizations = AppLocalizations.of(context)!;
@@ -39,18 +40,21 @@ class _RouteSuggestState extends State<RouteSuggest> {
           );
         }
 
+        // TODO: Use place here
         var stopKeys = _busInfo.stops.keys.toList(growable: false);
-        stopKeys.sort();
-        var stopList = stopKeys.map((stopName) {
-          return S2Choice(value: stopName, title: stopName);
+        var stopList = stopKeys.map((key) {
+          return S2Choice(
+              value: key,
+              title: _busInfo.strings[localeKey]?.stationName[key] ?? '');
         }).toList();
+        stopList.sort((s1, s2) => s1.title!.compareTo(s2.title!));
 
         var routeResults = <RouteResult>[];
         _busInfo.routes.forEach((routeId, route) {
           var srcIdx =
-              route.pieces.indexWhere((stop) => stop.stop == _srcStopName);
+              route.pieces.indexWhere((stop) => stop.stop == _srcStopId);
           var destIdx =
-              route.pieces.indexWhere((stop) => stop.stop == _destStopName);
+              route.pieces.indexWhere((stop) => stop.stop == _destStopId);
           var time = route.avgTime['$srcIdx-$destIdx'];
           if (time != null) {
             routeResults.add(RouteResult(routeId, route, time));
@@ -62,42 +66,58 @@ class _RouteSuggestState extends State<RouteSuggest> {
             children: [
               SmartSelect<String>.single(
                 title: appLocalizations.from,
-                selectedValue: _srcStopName,
+                selectedValue: _srcStopId,
                 choiceItems: stopList,
                 onChange: (selected) =>
-                    setState(() => _srcStopName = selected.value ?? ''),
+                    setState(() => _srcStopId = selected.value ?? ''),
                 modalType: S2ModalType.fullPage,
                 modalFilter: true,
                 modalFilterAuto: true,
                 modalFilterHint: "Search starting place",
-                tileBuilder: (context, state) => ListTile(
-                  leading: Column(
-                    mainAxisAlignment: MainAxisAlignment.center,
-                    children: [Text(appLocalizations.from)],
-                  ),
-                  title: Text(state.selected?.choice?.title ?? ''),
-                  onTap: state.showModal,
-                ),
+                tileBuilder: (context, state) {
+                  var selectedKey = state.selected?.choice?.value;
+                  var selectedTitle =
+                      _busInfo.strings[localeKey]?.stationName[selectedKey] ??
+                          '';
+
+                  return ListTile(
+                    leading: Column(
+                      mainAxisAlignment: MainAxisAlignment.center,
+                      children: [Text(appLocalizations.from)],
+                    ),
+                    title: Text(selectedTitle),
+                    trailing: const Icon(Icons.navigate_next),
+                    onTap: state.showModal,
+                  );
+                },
               ),
               const Divider(),
               SmartSelect<String>.single(
                 title: appLocalizations.to,
-                selectedValue: _destStopName,
+                selectedValue: _destStopId,
                 choiceItems: stopList,
                 onChange: (selected) =>
-                    setState(() => _destStopName = selected.value ?? ''),
+                    setState(() => _destStopId = selected.value ?? ''),
                 modalType: S2ModalType.fullPage,
                 modalFilter: true,
                 modalFilterAuto: true,
                 modalFilterHint: "Search destination",
-                tileBuilder: (context, state) => ListTile(
-                  leading: Column(
-                    mainAxisAlignment: MainAxisAlignment.center,
-                    children: [Text(appLocalizations.to)],
-                  ),
-                  title: Text(state.selected?.choice?.title ?? ''),
-                  onTap: state.showModal,
-                ),
+                tileBuilder: (context, state) {
+                  var selectedKey = state.selected?.choice?.value;
+                  var selectedTitle =
+                      _busInfo.strings[localeKey]?.stationName[selectedKey] ??
+                          '';
+
+                  return ListTile(
+                    leading: Column(
+                      mainAxisAlignment: MainAxisAlignment.center,
+                      children: [Text(appLocalizations.to)],
+                    ),
+                    title: Text(selectedTitle),
+                    trailing: const Icon(Icons.navigate_next),
+                    onTap: state.showModal,
+                  );
+                },
               ),
             ],
           ),

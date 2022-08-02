@@ -196,6 +196,9 @@ class _RouteDetailState extends State<RouteDetail>
               itemScrollController: itemScrollController,
               itemBuilder: (context, i) {
                 var stop = route.pieces[i];
+                var stopName =
+                    _busInfo.strings[localeKey]?.stationName[stop.stop] ?? '';
+
                 return ListTile(
                   selected:
                       _selectedBus == null ? false : _selectedBus.stop + 1 == i,
@@ -203,7 +206,7 @@ class _RouteDetailState extends State<RouteDetail>
                       _selectedBus == null ? true : _selectedBus.stop + 1 <= i,
                   // TODO: Change the icon
                   leading: const Icon(Icons.circle_outlined),
-                  title: Text(stop.stop),
+                  title: Text(stopName),
                   trailing: Text(
                     _selectedBus == null
                         ? ''

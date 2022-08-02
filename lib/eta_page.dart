@@ -149,7 +149,8 @@ class _ETAPageState extends State<ETAPage> {
         Map<String, Stop> stops = _busInfo.stops.map((key, stop) {
           var c = _busInfo.points[stop];
           var loc = LatLng(c[0], c[1]);
-          return MapEntry(key, Stop(key, loc));
+          var name = _busInfo.strings[localeKey]?.stationName[key] ?? '';
+          return MapEntry(key, Stop(key, name, loc));
         });
 
         // If a bus will pass the stop, add the route to it
@@ -286,11 +287,12 @@ class _ETAPageState extends State<ETAPage> {
 }
 
 class Stop {
+  final String key;
   final String name;
   final LatLng loc;
   final List<Route> routes = [];
 
-  Stop(this.name, this.loc);
+  Stop(this.key, this.name, this.loc);
 }
 
 class Route {
