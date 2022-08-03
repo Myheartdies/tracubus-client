@@ -158,7 +158,7 @@ class _ETAPageState extends State<ETAPage> {
         if (buses != null && buses.isNotEmpty) {
           for (var bus in buses) {
             stops.forEach((key, stop) {
-              var time = BusInfoModel.estimatedTime(stop.name, bus, _busInfo);
+              var time = BusInfoModel.estimatedTime(stop.key, bus, _busInfo);
               if (time >= 0) {
                 var routeId = bus.route;
                 var routeName =
@@ -169,18 +169,18 @@ class _ETAPageState extends State<ETAPage> {
             });
           }
         }
-        // For the first stops of each route, add the route to it
-        for (var route in _busInfo.routes.entries) {
-          var firstStop = route.value.pieces[0].stop;
-          if (stops.containsKey(firstStop)) {
-            int time = calculateTimeForFirstStop(route.value, _now);
-            if (time >= 0) {
-              var routeName =
-                  _busInfo.strings[localeKey]?.route[route.key]?.name ?? '';
-              stops[firstStop]!.routes.add(Route(route.key, routeName, time));
-            }
-          }
-        }
+        // // For the first stops of each route, add the route to it
+        // for (var route in _busInfo.routes.entries) {
+        //   var firstStop = route.value.pieces[0].stop;
+        //   if (stops.containsKey(firstStop)) {
+        //     int time = calculateTimeForFirstStop(route.value, _now);
+        //     if (time >= 0) {
+        //       var routeName =
+        //           _busInfo.strings[localeKey]?.route[route.key]?.name ?? '';
+        //       stops[firstStop]!.routes.add(Route(route.key, routeName, time));
+        //     }
+        //   }
+        // }
         // Sort the routes by time
         stops.forEach((key, stop) {
           stop.routes.sort((s1, s2) => s1.time.compareTo(s2.time));
@@ -229,19 +229,32 @@ class _ETAPageState extends State<ETAPage> {
                   Container(
                       color: Colors.blue.shade100,
                       padding: const EdgeInsets.all(8),
-                      child: Row(children: [
-                        Text(
-                          stop.name,
-                          style: textTheme.subtitle2,
-                          textAlign: TextAlign.start,
-                        ),
-                        if (_sortEnabled) Expanded(child: Container()),
-                        if (_sortEnabled)
+                      child: Column(
+                        crossAxisAlignment: CrossAxisAlignment.start,
+                        children: [
+                          Row(children: [
+                            Text(
+                              stop.name,
+                              style: textTheme.bodyText1,
+                              textAlign: TextAlign.start,
+                            ),
+                            if (_sortEnabled) Expanded(child: Container()),
+                            if (_sortEnabled)
+                              Text(
+                                distance ?? '',
+                                style: textTheme.caption,
+                              ),
+                          ]),
                           Text(
-                            distance ?? '',
+                            _busInfo.routes.entries
+                                .where((element) => element.value.pieces
+                                    .any((element) => element.stop == stop.key))
+                                .map((e) => e.key)
+                                .join(' '),
                             style: textTheme.caption,
                           ),
-                      ])),
+                        ],
+                      )),
                   if (stop.routes.isNotEmpty)
                     for (var route in stop.routes)
                       ListTile(
@@ -260,10 +273,10 @@ class _ETAPageState extends State<ETAPage> {
                   // Add a placeholder when routes are empty
                   if (stop.routes.isEmpty)
                     Container(
-                        padding: const EdgeInsets.all(12),
+                        padding: const EdgeInsets.all(16),
                         child: Text(
                           appLocalizations.noBusArriving,
-                          style: textTheme.caption,
+                          style: textTheme.bodyText2,
                           textAlign: TextAlign.start,
                         ))
                 ],
