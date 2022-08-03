@@ -23,6 +23,8 @@
     "searchRoutes": "Search Routes",
     "from": "Start",
     "to": "End",
+    "fuzzy": "Also search nearby stations",
+    "fuzzyDesp": "Enable this option to search other stations near your selected places.",
     "ett": "Transit duration",
     "minute": "min",
     "meter": "meter",

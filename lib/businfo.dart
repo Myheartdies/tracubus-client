@@ -66,7 +66,7 @@ class StopInRoute {
 
 @JsonSerializable()
 class BusInfo {
-  BusInfo(this.points, this.segments, this.stops, this.routes, this.strings);
+  BusInfo(this.points, this.segments, this.stops, this.routes, this.strings, this.places);
 
   /// points[idx] == [lat, lng]
   @JsonKey(required: true)
@@ -81,10 +81,13 @@ class BusInfo {
   final Map<String, int> stops;
 
   @JsonKey(required: true)
+  final Map<String, BusRoute> routes;
+
+  @JsonKey(required: true)
   final Map<String, LanguageString> strings;
 
   @JsonKey(required: true)
-  final Map<String, BusRoute> routes;
+  final Map<String, List<String>> places;
 
   factory BusInfo.fromJson(Map<String, dynamic> json) =>
       _$BusInfoFromJson(json);
@@ -110,13 +113,16 @@ class RouteString {
 
 @JsonSerializable()
 class LanguageString {
-  LanguageString(this.stationName, this.route);
+  LanguageString(this.stationName, this.route, this.place);
 
   @JsonKey(required: true)
   final Map<String, String> stationName;
 
   @JsonKey(required: true)
   final Map<String, RouteString> route;
+
+  @JsonKey(required: true)
+  final Map<String, String> place;
 
   factory LanguageString.fromJson(Map<String, dynamic> json) =>
       _$LanguageStringFromJson(json);

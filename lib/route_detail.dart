@@ -14,15 +14,15 @@ import 'businfo_model.dart';
 class RouteDetail extends StatefulWidget {
   final String routeId;
   final BusInfo busInfo;
-  final String? startStopId;
-  final String? endStopId;
+  final int? startStopIdx;
+  final int? endStopIdx;
 
   const RouteDetail(
       {Key? key,
       required this.routeId,
       required this.busInfo,
-      this.startStopId,
-      this.endStopId})
+      this.startStopIdx,
+      this.endStopIdx})
       : super(key: key);
 
   @override
@@ -45,16 +45,10 @@ class _RouteDetailState extends State<RouteDetail>
     });
 
     WidgetsBinding.instance?.addPostFrameCallback((timeStamp) {
-      if (widget.startStopId != null && widget.endStopId != null) {
-        var stop = _route?.pieces
-            .firstWhere((piece) => piece.stop == widget.startStopId);
-        if (stop != null) {
-          var index = _route?.pieces.indexOf(stop);
-          if (index != null) {
-            itemScrollController.scrollTo(
-                index: index, duration: const Duration(milliseconds: 500));
-          }
-        }
+      var index = widget.startStopIdx;
+      if (index != null && widget.endStopIdx != null) {
+        itemScrollController.scrollTo(
+            index: index, duration: const Duration(milliseconds: 500));
       }
     });
   }
@@ -128,7 +122,9 @@ class _RouteDetailState extends State<RouteDetail>
               // be shown in a lighter color
               _selectedBusLocation == null
                   ? activeColor
-                  : (_selectedBusLocation.stop <= i ? activeColor : inactiveColor),
+                  : (_selectedBusLocation.stop <= i
+                      ? activeColor
+                      : inactiveColor),
             ],
           );
           routePolyLines.add(line);
@@ -230,9 +226,9 @@ class _RouteDetailState extends State<RouteDetail>
                 var stopName =
                     _busInfo.strings[localeKey]?.stationName[stop.stop] ?? '';
                 String? subtitle;
-                if (stop.stop == widget.startStopId) {
+                if (i == widget.startStopIdx) {
                   subtitle = appLocalizations.from;
-                } else if (stop.stop == widget.endStopId) {
+                } else if (i == widget.endStopIdx) {
                   subtitle = appLocalizations.to;
                 }
 
@@ -250,8 +246,8 @@ class _RouteDetailState extends State<RouteDetail>
                   trailing: Text(
                     _selectedBusLocation == null
                         ? ''
-                        : BusInfoModel.timeString(stop.stop, _selectedBusLocation,
-                            _busInfo, appLocalizations),
+                        : BusInfoModel.timeString(stop.stop,
+                            _selectedBusLocation, _busInfo, appLocalizations),
                   ),
                   onTap: () {
                     if (allStops.containsKey(stop.stop)) {
