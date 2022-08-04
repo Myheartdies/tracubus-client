@@ -6,7 +6,7 @@
     "fetchError": "錯誤: 伺服器回應的資料出錯。",
     "permissionRequest": "權限要求",
     "locationRequestDesp": "爲了按照距離對站點進行排序，我們需要獲取您當前的位置信息。",
-    "locationPermissionErr": "程式未能獲取位置權限。請檢查您的系統權限設定。",
+    "locationPermissionErr": "程式未能獲取位置權限：此功能在網頁版中暫未實現。",
 
     "others": "其他",
     "settings": "設定",

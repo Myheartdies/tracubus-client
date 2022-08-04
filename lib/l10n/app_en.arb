@@ -6,7 +6,7 @@
     "fetchError": "Error: Server returns invalid data.",
     "permissionRequest": "Permission Request",
     "locationRequestDesp": "To list bus stops in distance order, we need your permission to access your current location.",
-    "locationPermissionErr": "Failed to get location permission. Please check your system permission settings.",
+    "locationPermissionErr": "Failed to get location permission: this function is not implemented yet for web version.",
 
     "others": "Others",
     "settings": "Settings",
