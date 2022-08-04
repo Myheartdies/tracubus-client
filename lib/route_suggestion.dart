@@ -50,23 +50,50 @@ class _RouteSuggestState extends State<RouteSuggest> {
         placeList.sort((s1, s2) => s1.title!.compareTo(s2.title!));
 
         List<RouteResult> searchResults = [];
+        List<RouteResult>? fuzzySearchResults;
         if (_srcPlaceId != null && _destPlaceId != null) {
           searchByPlace(_busInfo, searchResults, _srcPlaceId!, _destPlaceId!);
+          // Exact results are sorted by routeId
+          searchResults
+              .sort((e1, e2) => BusInfoModel.compare(e1.routeId, e2.routeId));
           if (_fuzzyEnabled) {
-            searchResults
-                .addAll(fuzzySearch(_busInfo, _srcPlaceId!, _destPlaceId!));
+            fuzzySearchResults =
+                fuzzySearch(_busInfo, _srcPlaceId!, _destPlaceId!);
+            // For fuzzy results, they should be sorted by distance first
+            // and then by routeId.
+            fuzzySearchResults.sort((r1, r2) {
+              // First check whether they are the same station.
+              // Some stations share the same name although they have
+              // different ids, and they are considered as identical
+              // when showing to users. So we compare them by name instead
+              // of id.
+              var r1SrcName =
+                  _busInfo.strings[localeKey]?.stationName[r1.srcId];
+              var r1DstName =
+                  _busInfo.strings[localeKey]?.stationName[r1.dstId];
+              var r2SrcName =
+                  _busInfo.strings[localeKey]?.stationName[r2.srcId];
+              var r2DstName =
+                  _busInfo.strings[localeKey]?.stationName[r2.dstId];
+              if (r1SrcName == r2SrcName && r1DstName == r2DstName) {
+                return 0;
+              } else {
+                // Not same station, compare distances
+                var d1Src = distance(_busInfo, _srcPlaceId!, r1.srcId);
+                var d1Dst = distance(_busInfo, _destPlaceId!, r1.dstId);
+                var distance1 = d1Src + d1Dst;
+
+                var d2Src = distance(_busInfo, _srcPlaceId!, r2.srcId);
+                var d2Dst = distance(_busInfo, _destPlaceId!, r2.dstId);
+                var distance2 = d2Src + d2Dst;
+
+                var dist = distance1.compareTo(distance2);
+                if (dist != 0) return dist;
+              }
+              // For stations with the same distance offset, compare keys
+              return BusInfoModel.compare(r1.routeId, r2.routeId);
+            });
           }
-          searchResults.sort((r1, r2) {
-            var d1Src = distance(_busInfo, _srcPlaceId!, r1.srcId);
-            var d1Dst = distance(_busInfo, _destPlaceId!, r1.dstId);
-            var distance1 = d1Src + d1Dst;
-
-            var d2Src = distance(_busInfo, _srcPlaceId!, r2.srcId);
-            var d2Dst = distance(_busInfo, _destPlaceId!, r2.dstId);
-            var distance2 = d2Src + d2Dst;
-
-            return distance1.compareTo(distance2);
-          });
         }
 
         return Column(children: [
@@ -173,58 +200,62 @@ class _RouteSuggestState extends State<RouteSuggest> {
           ),
           Expanded(
             child: ListView.builder(
-                itemCount: searchResults.length,
-                itemBuilder: (context, index) {
-                  RouteResult route = searchResults[index];
-                  return Container(
-                    decoration: BoxDecoration(
-                      border: Border(
-                        bottom: BorderSide(
-                          color: Colors.grey.shade300,
-                        ),
+                // searchResults + Divider + fuzzySearchResults
+                itemCount: _fuzzyEnabled
+                    ? searchResults.length + 1 + fuzzySearchResults!.length
+                    : searchResults.length,
+                itemBuilder: (context, idx) {
+                  late int index;
+                  late RouteResult route;
+                  if (idx == searchResults.length) {
+                    return const Divider();
+                  } else if (idx > searchResults.length) {
+                    index = idx - searchResults.length - 1;
+                    route = fuzzySearchResults![index];
+                  } else {
+                    index = idx;
+                    route = searchResults[index];
+                  }
+                  return ListTile(
+                      title: Text(route.routeId),
+                      isThreeLine: true,
+                      subtitle: Column(
+                        crossAxisAlignment: CrossAxisAlignment.start,
+                        children: [
+                          Text(_busInfo.strings[localeKey]
+                                  ?.stationName[route.srcId] ??
+                              ''),
+                          Text(_busInfo.strings[localeKey]
+                                  ?.stationName[route.dstId] ??
+                              '')
+                        ],
                       ),
-                    ),
-                    child: ListTile(
-                        title: Text(route.routeId),
-                        isThreeLine: true,
-                        subtitle: Column(
-                          crossAxisAlignment: CrossAxisAlignment.start,
-                          children: [
-                            Text(_busInfo.strings[localeKey]
-                                    ?.stationName[route.srcId] ??
-                                ''),
-                            Text(_busInfo.strings[localeKey]
-                                    ?.stationName[route.dstId] ??
-                                '')
-                          ],
-                        ),
-                        trailing: Column(
-                          mainAxisAlignment: MainAxisAlignment.spaceEvenly,
-                          crossAxisAlignment: CrossAxisAlignment.end,
-                          children: [
-                            Text(
-                              appLocalizations.ett,
-                              style: Theme.of(context).textTheme.caption,
-                            ),
-                            Text(route.duration +
-                                ' ' +
-                                appLocalizations.minute +
-                                (route.plural ? appLocalizations.plural : ''))
-                          ],
-                        ),
-                        onTap: () {
-                          Navigator.push(
-                            context,
-                            MaterialPageRoute(
-                                builder: (context) => RouteDetail(
-                                      routeId: route.routeId,
-                                      busInfo: _busInfo,
-                                      startStopIdx: route.srcIdx,
-                                      endStopIdx: route.dstIdx,
-                                    )),
-                          );
-                        }),
-                  );
+                      trailing: Column(
+                        mainAxisAlignment: MainAxisAlignment.spaceEvenly,
+                        crossAxisAlignment: CrossAxisAlignment.end,
+                        children: [
+                          Text(
+                            appLocalizations.ett,
+                            style: Theme.of(context).textTheme.caption,
+                          ),
+                          Text(route.duration +
+                              ' ' +
+                              appLocalizations.minute +
+                              (route.plural ? appLocalizations.plural : ''))
+                        ],
+                      ),
+                      onTap: () {
+                        Navigator.push(
+                          context,
+                          MaterialPageRoute(
+                              builder: (context) => RouteDetail(
+                                    routeId: route.routeId,
+                                    busInfo: _busInfo,
+                                    startStopIdx: route.srcIdx,
+                                    endStopIdx: route.dstIdx,
+                                  )),
+                        );
+                      });
                 }),
           )
         ]);
@@ -261,6 +292,8 @@ class _RouteSuggestState extends State<RouteSuggest> {
       if (better(result, r)) {
         toRemove.add(r);
         add = true;
+      } else if (better(r, result)) {
+        break;
       }
     }
     if (i == list.length) {
@@ -277,7 +310,7 @@ class _RouteSuggestState extends State<RouteSuggest> {
 
   /// Find route with src & dest station ID, in a specific route.
   /// This function assumes that busInfo is valid.
-  /// `results` stays clean (free of dup).
+  /// Results are directly added into `results`. It stays clean (free of dup).
   static void searchByStationInRoute(BusInfo busInfo, List<RouteResult> results,
       String srcStation, String destStation, String routeId) {
     var route = busInfo.routes[routeId]!;
@@ -315,20 +348,21 @@ class _RouteSuggestState extends State<RouteSuggest> {
 
   /// Find route with src & dest station ID, in all routes.
   /// This function assumes that busInfo is valid.
-  /// `results` stays clean (free of dup).
+  /// Results are directly added into `results`. It stays clean (free of dup).
   static void searchByStation(BusInfo busInfo, List<RouteResult> results,
       String srcStation, String destStation) {
     // For all routes:
     var routes = busInfo.routes.keys.toList();
-    routes.sort((e1, e2) => BusInfoModel.compare(e1, e2));
     for (var routeId in routes) {
-      searchByStationInRoute(busInfo, results, srcStation, destStation, routeId);
+      searchByStationInRoute(
+          busInfo, results, srcStation, destStation, routeId);
     }
   }
 
   /// Find route with src & dest place ID, in all routes.
   /// This function assumes that busInfo is valid.
-  /// `results` stays clean (free of dup).
+  /// Results are directly added into `results`.
+  /// The results free of dup.
   static void searchByPlace(BusInfo busInfo, List<RouteResult> results,
       String srcPlaceId, String destPlaceId) {
     var srcStations = busInfo.places[srcPlaceId] ?? [];
@@ -388,7 +422,8 @@ class _RouteSuggestState extends State<RouteSuggest> {
   /// Find route with src & dest place ID, in all routes with fuzzy
   /// search. Stations near src & dest place will be used.
   /// This function assumes busInfo is valid.
-  /// `results` stays clean (free of dup).
+  /// <p>
+  /// Results are returned as a new List;
   static List<RouteResult> fuzzySearch(
       BusInfo busInfo, String srcPlaceId, String destPlaceId) {
     // Find nearby stations of the selected places
@@ -399,17 +434,19 @@ class _RouteSuggestState extends State<RouteSuggest> {
     for (var p in srcNearbyPlaces) {
       searchByPlace(busInfo, results1, p, destPlaceId);
     }
-    List<RouteResult> results2 = [];
     for (var p in destNearbyPlaces) {
-      searchByPlace(busInfo, results2, srcPlaceId, p);
+      searchByPlace(busInfo, results1, srcPlaceId, p);
     }
-    List<RouteResult> results3 = [];
+    // results2 is not deduped with results1
+    // because users may intentionally view those extra results
+    // for fuzzy search
+    List<RouteResult> results2 = [];
     for (var p1 in srcNearbyPlaces) {
       for (var p2 in destNearbyPlaces) {
-        searchByPlace(busInfo, results3, p1, p2);
+        searchByPlace(busInfo, results2, p1, p2);
       }
     }
-    return [...results1, ...results2, ...results3];
+    return [...results1, ...results2];
   }
 }
 
