@@ -319,10 +319,11 @@ class _RouteSuggestState extends State<RouteSuggest> {
   static void searchByStation(BusInfo busInfo, List<RouteResult> results,
       String srcStation, String destStation) {
     // For all routes:
-    busInfo.routes.forEach((routeId, route) {
-      searchByStationInRoute(
-          busInfo, results, srcStation, destStation, routeId);
-    });
+    var routes = busInfo.routes.keys.toList();
+    routes.sort((e1, e2) => BusInfoModel.compare(e1, e2));
+    for (var routeId in routes) {
+      searchByStationInRoute(busInfo, results, srcStation, destStation, routeId);
+    }
   }
 
   /// Find route with src & dest place ID, in all routes.
@@ -391,10 +392,8 @@ class _RouteSuggestState extends State<RouteSuggest> {
   static List<RouteResult> fuzzySearch(
       BusInfo busInfo, String srcPlaceId, String destPlaceId) {
     // Find nearby stations of the selected places
-    var srcNearbyPlaces =
-        findNearbyPlaces(busInfo, srcPlaceId).sublist(0, 2);
-    var destNearbyPlaces =
-        findNearbyPlaces(busInfo, destPlaceId).sublist(0, 2);
+    var srcNearbyPlaces = findNearbyPlaces(busInfo, srcPlaceId).sublist(0, 2);
+    var destNearbyPlaces = findNearbyPlaces(busInfo, destPlaceId).sublist(0, 2);
 
     List<RouteResult> results1 = [];
     for (var p in srcNearbyPlaces) {

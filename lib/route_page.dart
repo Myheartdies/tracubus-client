@@ -41,15 +41,16 @@ class _RoutePageState extends State<RoutePage> {
           child: Text(appLocalizations.fetching),
         );
       } else {
-        var _routes = _busInfo.routes;
+        var _routes = _busInfo.routes.entries.toList();
+        _routes.sort((e1, e2) => BusInfoModel.compare(e1.key, e2.key));
         var _strings = _busInfo.strings;
 
         return ListView.builder(
-          itemCount: _routes.entries.length * 2,
+          itemCount: _routes.length * 2,
           itemBuilder: (context, i) {
             if (i.isOdd) return const Divider();
             final index = i ~/ 2;
-            var route = _routes.entries.elementAt(index);
+            var route = _routes.elementAt(index);
 
             var routeName = _strings[localeKey]?.route[route.key]?.name ?? '';
 

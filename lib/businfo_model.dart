@@ -145,6 +145,15 @@ class BusInfoModel extends ChangeNotifier {
           (t > 1 ? appLocalizations.plural : '');
     }
   }
+
+  static int compare(String key1, String key2) {
+    const routes = ['1A', '1B', '2', '3', '4', '8', '5', '6A', '6B', '7', 'N', 'H'];
+    var idx1 = routes.indexOf(key1);
+    idx1 = idx1 == -1 ? 999 : idx1;
+    var idx2 = routes.indexOf(key2);
+    idx2 = idx2 == -1 ? 999 : idx2;
+    return idx1.compareTo(idx2);
+  }
 }
 
 class BusLocationModel extends ChangeNotifier {
