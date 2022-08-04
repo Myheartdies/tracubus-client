@@ -11,7 +11,7 @@
     "language": "Language",
     "location": "Location",
     "locationDesp": "For functions such as searching nearby stations",
-    "locationPermissionErr": "Failed to get location permission. Please check your system permission settings.",
+    "locationPermissionErr": "Failed to get location permission: this function is not implemented yet for web version.",
     "about": "About",
     "aboutTeam": "About our team",
     "license": "License",
