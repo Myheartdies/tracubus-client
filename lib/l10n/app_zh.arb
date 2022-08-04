@@ -11,7 +11,7 @@
     "language": "語言",
     "location": "位置",
     "locationDesp": "用於搜尋附近站點等功能",
-    "locationPermissionErr": "程式未能獲取位置權限。請檢查您的系統權限設定。",
+    "locationPermissionErr": "程式未能獲取位置權限：此功能在網頁版中暫未實現。",
     "about": "關於",
     "aboutTeam": "關於我們",
     "license": "許可",
