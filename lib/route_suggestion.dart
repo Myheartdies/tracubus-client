@@ -50,15 +50,15 @@ class _RouteSuggestState extends State<RouteSuggest> {
         placeList.sort((s1, s2) => s1.title!.compareTo(s2.title!));
 
         List<RouteResult> searchResults = [];
-        List<RouteResult>? fuzzySearchResults;
+        List<RouteResult> fuzzySearchResults = [];
         if (_srcPlaceId != null && _destPlaceId != null) {
           searchByPlace(_busInfo, searchResults, _srcPlaceId!, _destPlaceId!);
           // Exact results are sorted by routeId
           searchResults
               .sort((e1, e2) => BusInfoModel.compare(e1.routeId, e2.routeId));
           if (_fuzzyEnabled) {
-            fuzzySearchResults =
-                fuzzySearch(_busInfo, _srcPlaceId!, _destPlaceId!);
+            fuzzySearchResults
+                .addAll(fuzzySearch(_busInfo, _srcPlaceId!, _destPlaceId!));
             // For fuzzy results, they should be sorted by distance first
             // and then by routeId.
             fuzzySearchResults.sort((r1, r2) {
@@ -202,7 +202,7 @@ class _RouteSuggestState extends State<RouteSuggest> {
             child: ListView.builder(
                 // searchResults + Divider + fuzzySearchResults
                 itemCount: _fuzzyEnabled
-                    ? searchResults.length + 1 + fuzzySearchResults!.length
+                    ? searchResults.length + 1 + fuzzySearchResults.length
                     : searchResults.length,
                 itemBuilder: (context, idx) {
                   late int index;
@@ -211,7 +211,7 @@ class _RouteSuggestState extends State<RouteSuggest> {
                     return const Divider();
                   } else if (idx > searchResults.length) {
                     index = idx - searchResults.length - 1;
-                    route = fuzzySearchResults![index];
+                    route = fuzzySearchResults[index];
                   } else {
                     index = idx;
                     route = searchResults[index];
