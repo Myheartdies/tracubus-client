@@ -138,8 +138,10 @@ class _ETAPageState extends State<ETAPage> {
       body: Consumer2<BusInfoModel, BusLocationModel>(
           builder: (context, infoModel, locationModel, child) {
         var _busInfo = infoModel.busInfo;
-        if (infoModel.errorOccured) {
+        if (infoModel.fetchError) {
           return Center(child: Text(appLocalizations.fetchError));
+        } else if (infoModel.dataError) {
+          return Center(child: Text(appLocalizations.dataError));
         } else if (_busInfo == null) {
           return Center(
             child: Text(appLocalizations.fetching),

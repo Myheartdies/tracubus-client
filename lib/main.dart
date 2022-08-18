@@ -14,6 +14,10 @@ import 'others_page.dart';
 import 'businfo_model.dart';
 import 'settings_model.dart';
 
+const baseUrl = "http://20.24.87.7:4242";
+const ssePath = "/api/info-sse";
+const routesPath = "/api/routes.json";
+
 void main() {
   runApp(
     MultiProvider(
@@ -85,7 +89,7 @@ class _MyHomePageState extends State<MyHomePage> {
   }
 
   void registerBusLocUpdater() {
-    const url = "http://20.24.87.7:4242/api/info-sse";
+    var url = baseUrl + ssePath;
 
     // The time when the bus location was updated
     int updateTime = 0;
@@ -138,16 +142,21 @@ class _MyHomePageState extends State<MyHomePage> {
   }
 
   Future<void> fetchRoutes() async {
-    var j = '';
+    late String j;
     try {
-      var response =
-          await http.get(Uri.parse('http://20.24.87.7:4242/api/routes.json'));
+      var response = await http.get(Uri.parse(baseUrl + routesPath));
       j = response.body;
-      Provider.of<BusInfoModel>(context, listen: false).updateBusInfo(j);
     } catch (e) {
-      print('Error fetching routes info: $e');
-      // TODO: Display network error
+      // print('Error fetching routes info: $e');
+      // Most likely a network error, retry 3 seconds later
+      Provider.of<BusInfoModel>(context, listen: false).setFetchError(true);
+      Timer(const Duration(seconds: 3), () {
+        Provider.of<BusInfoModel>(context, listen: false).resetState();
+        fetchRoutes();
+      });
+      return;
     }
+    Provider.of<BusInfoModel>(context, listen: false).updateBusInfo(j);
   }
 
   @override

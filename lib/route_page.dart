@@ -32,14 +32,12 @@ class _RoutePageState extends State<RoutePage> {
 
       var _busInfo = infoModel.busInfo;
 
-      if (infoModel.errorOccured) {
-        return Center(
-          child: Text(appLocalizations.fetchError),
-        );
+      if (infoModel.fetchError) {
+        return Center(child: Text(appLocalizations.fetchError));
+      } else if (infoModel.dataError) {
+        return Center(child: Text(appLocalizations.dataError));
       } else if (_busInfo == null) {
-        return Center(
-          child: Text(appLocalizations.fetching),
-        );
+        return Center(child: Text(appLocalizations.fetching));
       } else {
         var _routes = _busInfo.routes.entries.toList();
         _routes.sort((e1, e2) => BusInfoModel.compare(e1.key, e2.key));

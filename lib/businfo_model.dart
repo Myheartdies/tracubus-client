@@ -6,15 +6,28 @@ import 'package:flutter_gen/gen_l10n/app_localizations.dart';
 import 'businfo.dart';
 
 /// This model extends ChangeNotifier and holds infomation fetched from server
-/// Initially `busInfo == null` and `errorOccured == false`.
-/// Calling `updateBusInfo()` will update the two fileds accordingly.
+/// Initially `busInfo == null`, `fetchError == false` and `dataError == false`.
+/// Calling `updateBusInfo()` will update these fileds accordingly.
 class BusInfoModel extends ChangeNotifier {
   BusInfo? busInfo;
-  bool errorOccured = false;
+  bool fetchError = false;
+  bool dataError = false;
+
+  void resetState() {
+    busInfo = null;
+    fetchError = false;
+    dataError = false;
+    notifyListeners();
+  }
+
+  void setFetchError(bool flag) {
+    fetchError = flag;
+    notifyListeners();
+  }
 
   /// Results:
-  /// 1. `busInfo == null` and `errorOccured == false`: still fetching data
-  /// 2. `busInfo == null` and `errorOccured == true`: wrong data
+  /// 1. `busInfo == null` and `dataError == false`: still fetching data
+  /// 2. `busInfo == null` and `dataError == true`: wrong data
   /// 3. `busInfo != null`: success
   void updateBusInfo(String infoJson) {
     try {
@@ -61,7 +74,7 @@ class BusInfoModel extends ChangeNotifier {
       // TODO: log the exception
       print(e);
     }
-    errorOccured = true;
+    dataError = true;
     notifyListeners();
   }
 

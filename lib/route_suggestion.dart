@@ -32,14 +32,12 @@ class _RouteSuggestState extends State<RouteSuggest> {
       ),
       body: Consumer<BusInfoModel>(builder: (context, infoModel, child) {
         var _busInfo = infoModel.busInfo;
-        if (infoModel.errorOccured) {
-          return Center(
-            child: Text(appLocalizations.fetchError),
-          );
+        if (infoModel.fetchError) {
+          return Center(child: Text(appLocalizations.fetchError));
+        } else if (infoModel.dataError) {
+          return Center(child: Text(appLocalizations.dataError));
         } else if (_busInfo == null) {
-          return Center(
-            child: Text(appLocalizations.fetching),
-          );
+          return Center(child: Text(appLocalizations.fetching));
         }
 
         // Choices generated from places
