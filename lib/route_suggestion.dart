@@ -266,8 +266,11 @@ class _RouteSuggestState extends State<RouteSuggest> {
   static String placeName(String key, BusInfo busInfo, String localeKey) {
     var stations = busInfo.places[key] ?? [];
     if (stations.length > 1) {
+      /// For places with more than one stops, the name is given in
+      /// strings -> place section.
       return busInfo.strings[localeKey]?.place[key] ?? '';
     } else if (stations.length == 1) {
+      /// For places with only one stop, the name is the stop name
       return busInfo.strings[localeKey]?.stationName[stations[0]] ?? '';
     } else {
       return '';

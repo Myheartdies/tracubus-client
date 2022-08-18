@@ -1,7 +1,6 @@
 import 'dart:convert';
 import 'dart:math';
 
-import 'package:flutter/foundation.dart';
 import 'package:flutter/widgets.dart';
 import 'package:flutter_gen/gen_l10n/app_localizations.dart';
 import 'businfo.dart';
@@ -147,7 +146,20 @@ class BusInfoModel extends ChangeNotifier {
   }
 
   static int compare(String key1, String key2) {
-    const routes = ['1A', '1B', '2', '3', '4', '8', '5', '6A', '6B', '7', 'N', 'H'];
+    const routes = [
+      '1A',
+      '1B',
+      '2',
+      '3',
+      '4',
+      '8',
+      '5',
+      '6A',
+      '6B',
+      '7',
+      'N',
+      'H'
+    ];
     var idx1 = routes.indexOf(key1);
     idx1 = idx1 == -1 ? 999 : idx1;
     var idx2 = routes.indexOf(key2);
