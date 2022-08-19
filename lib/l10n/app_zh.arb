@@ -5,20 +5,20 @@
     "fetching": "更新校巴資料...",
     "fetchError": "錯誤: 請檢查網絡連接。",
     "dataError": "錯誤: 伺服器回應的資料出錯。",
-    "permissionRequest": "權限要求",
-    "locationRequestDesp": "爲了按照距離對站點進行排序，我們需要獲取您當前的位置信息。",
-    "locationPermissionErr": "程式未能獲取位置權限。請檢查您的系統權限設定。",
 
     "others": "其他",
     "settings": "設定",
     "language": "語言",
+    "location": "位置",
+    "locationDesp": "用於搜尋附近站點等功能",
+    "locationPermissionErr": "程式未能獲取位置權限。請檢查您的系統權限設定。",
     "about": "關於",
     "aboutTeam": "關於我們",
 
     "busRoutes": "路線列表",
 
     "arrivalTime": "到站時間",
-    "sortHint": "提示：點按熒幕右上角的圖標列出距離您最近的站點",
+    "sortHint": "提示：要列出距離您最近的站點，請在設定頁面開啓位置選項",
     "noBusArriving": "沒有即將到站的校巴",
 
     "searchRoutes": "搜尋線路",

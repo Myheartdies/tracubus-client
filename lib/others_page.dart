@@ -3,6 +3,7 @@ import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
 import 'about_page.dart';
 import 'settings_model.dart';
+import 'location_model.dart';
 
 class OthersPage extends StatefulWidget {
   const OthersPage({Key? key}) : super(key: key);
@@ -41,10 +42,44 @@ class _OthersPageState extends State<OthersPage> {
                                 builder: (context) => LanguagePage(
                                     selected: settingsModel.locale)))
                         .then((localeKey) {
-                          if (localeKey != null) {
-                            settingsModel.setLocale(LocaleUtil.key2Locale(localeKey));
-                          }
-                        });
+                      if (localeKey != null) {
+                        settingsModel
+                            .setLocale(LocaleUtil.key2Locale(localeKey));
+                      }
+                    });
+                  },
+                );
+              },
+            ),
+            Consumer<SettingsModel>(
+              builder: (context, settingsModel, child) {
+                return CheckboxListTile(
+                  title: Text(appLocalizations.location),
+                  subtitle: Text(appLocalizations.locationDesp),
+                  value: settingsModel.enableLocation ?? false,
+                  onChanged: (v) async {
+                    var provider =
+                        Provider.of<LocationModel>(context, listen: false);
+                    if (v ?? false) {
+                      // Try to turn on location
+                      var locAvailable =
+                          await provider.checkLocationPermission();
+                      if (!locAvailable) {
+                        // Failed to enable location, e.g. because user rejects the request
+                        var snackBar = SnackBar(
+                          content: Text(appLocalizations.locationPermissionErr),
+                          duration: const Duration(seconds: 5),
+                        );
+                        ScaffoldMessenger.of(context).showSnackBar(snackBar);
+                        v = false;
+                      }
+                    }
+                    settingsModel.setEnableLocation(v ?? false);
+                    if (v ?? false) {
+                      provider.registerLocUpdater();
+                    } else {
+                      provider.cancelLocUpdater();
+                    }
                   },
                 );
               },
@@ -102,8 +137,7 @@ class LanguagePage extends StatelessWidget {
                   : Icon(Icons.radio_button_unchecked,
                       color: Theme.of(context).primaryColor),
               title: Text(locale.value),
-              onTap: () =>
-                  Navigator.pop(context, locale.key),
+              onTap: () => Navigator.pop(context, locale.key),
             )
         ],
       ),

@@ -13,6 +13,7 @@ import 'route_suggestion.dart';
 import 'others_page.dart';
 import 'businfo_model.dart';
 import 'settings_model.dart';
+import 'location_model.dart';
 
 const baseUrl = "http://20.24.87.7:4242";
 const ssePath = "/api/info-sse";
@@ -24,7 +25,8 @@ void main() {
       providers: [
         ChangeNotifierProvider(create: (context) => BusLocationModel()),
         ChangeNotifierProvider(create: (context) => BusInfoModel()),
-        ChangeNotifierProvider(create: (context) => SettingsModel()),
+        ChangeNotifierProvider(create: (context) => LocationModel()),
+        ChangeNotifierProvider(create: (context) => SettingsModel(context)),
       ],
       child: const MyApp(),
     ),
@@ -79,13 +81,26 @@ class _MyHomePageState extends State<MyHomePage> {
     super.initState();
     // Initialize data here
 
-    // Fetch information about routes, stops, etc.
-    fetchRoutes();
+    // There are many calls to `notifyListeners` during the initiation process,
+    // which may cause "markNeedsBuild() called during build".
+    // Therefore we use addPostFrameCallback to delay the initiation.
+    WidgetsBinding.instance?.addPostFrameCallback((_) {
+      // Fetch information about routes, stops, etc.
+      fetchRoutes();
 
-    // Fetch realtime location of buses
-    registerBusLocUpdater();
+      // Fetch realtime location of buses
+      registerBusLocUpdater();
 
-    Provider.of<SettingsModel>(context, listen: false).initLocale();
+      // Load settings from SharedPreference
+      Provider.of<SettingsModel>(context, listen: false)
+          .initSettings()
+          .then((_) {
+        var locProvider = Provider.of<LocationModel>(context, listen: false);
+        if (locProvider.enabled) {
+          locProvider.registerLocUpdater();
+        }
+      });
+    });
   }
 
   void registerBusLocUpdater() {

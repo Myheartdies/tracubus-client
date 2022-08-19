@@ -7,10 +7,9 @@ import 'package:latlong2/latlong.dart';
 import 'dart:math';
 
 import 'businfo_model.dart';
+import 'location_model.dart';
 import 'businfo.dart';
 import 'route_detail.dart';
-
-import 'package:location/location.dart';
 
 class ETAPage extends StatefulWidget {
   const ETAPage({Key? key}) : super(key: key);
@@ -20,8 +19,6 @@ class ETAPage extends StatefulWidget {
 }
 
 class _ETAPageState extends State<ETAPage> {
-  bool _sortEnabled = false;
-  double _lat = 0, _lng = 0;
   int _now = 0;
 
   @override
@@ -34,73 +31,6 @@ class _ETAPageState extends State<ETAPage> {
     });
   }
 
-  Future<LocationData?> _checkLocation(BuildContext context) async {
-    Location location = Location();
-
-    bool _serviceEnabled = await location.serviceEnabled();
-    if (!_serviceEnabled) {
-      _serviceEnabled = await location.requestService();
-      if (!_serviceEnabled) {
-        // TODO: show error?
-        return null;
-      }
-    }
-    PermissionStatus _permissionGranted = await location.hasPermission();
-    if (_permissionGranted == PermissionStatus.denied) {
-      await _requestHint(context);
-      _permissionGranted = await location.requestPermission();
-      if (_permissionGranted != PermissionStatus.granted) {
-        await _requestFailedHint(context);
-        return null;
-      }
-    }
-
-    return await location.getLocation();
-  }
-
-  Future<void> _requestHint(BuildContext context) {
-    var appLocalizations = AppLocalizations.of(context)!;
-    return showDialog<void>(
-      context: context,
-      barrierDismissible: false,
-      builder: (context) {
-        return AlertDialog(
-          title: Text(appLocalizations.permissionRequest),
-          content: Text(appLocalizations.locationRequestDesp),
-          actions: [
-            TextButton(
-              onPressed: () {
-                Navigator.of(context).pop();
-              },
-              child: Text(appLocalizations.ok),
-            )
-          ],
-        );
-      },
-    );
-  }
-
-  Future<void> _requestFailedHint(BuildContext context) {
-    var appLocalizations = AppLocalizations.of(context)!;
-    return showDialog<void>(
-      context: context,
-      builder: (context) {
-        return AlertDialog(
-          title: Text(appLocalizations.error),
-          content: Text(appLocalizations.locationPermissionErr),
-          actions: [
-            TextButton(
-              onPressed: () {
-                Navigator.of(context).pop();
-              },
-              child: Text(appLocalizations.ok),
-            )
-          ],
-        );
-      },
-    );
-  }
-
   @override
   Widget build(BuildContext context) {
     var appLocalizations = AppLocalizations.of(context)!;
@@ -110,33 +40,9 @@ class _ETAPageState extends State<ETAPage> {
     return Scaffold(
       appBar: AppBar(
         title: Text(appLocalizations.arrivalTime),
-        actions: [
-          IconButton(
-            onPressed: () {
-              if (!_sortEnabled) {
-                _checkLocation(context).then((data) {
-                  if (data != null &&
-                      data.latitude != null &&
-                      data.longitude != null) {
-                    setState(() {
-                      _lat = data.latitude!;
-                      _lng = data.longitude!;
-                      _sortEnabled = true;
-                    });
-                  }
-                });
-              } else {
-                setState(() => _sortEnabled = false);
-              }
-            },
-            icon: Icon(
-              _sortEnabled ? Icons.location_searching : Icons.location_disabled,
-            ),
-          )
-        ],
       ),
-      body: Consumer2<BusInfoModel, BusLocationModel>(
-          builder: (context, infoModel, locationModel, child) {
+      body: Consumer3<BusInfoModel, BusLocationModel, LocationModel>(
+          builder: (context, infoModel, busLocModel, locModel, child) {
         var _busInfo = infoModel.busInfo;
         if (infoModel.fetchError) {
           return Center(child: Text(appLocalizations.fetchError));
@@ -156,7 +62,7 @@ class _ETAPageState extends State<ETAPage> {
         });
 
         // If a bus will pass the stop, add the route to it
-        var buses = locationModel.busLocations;
+        var buses = busLocModel.busLocations;
         if (buses != null && buses.isNotEmpty) {
           for (var bus in buses) {
             stops.forEach((key, stop) {
@@ -188,11 +94,15 @@ class _ETAPageState extends State<ETAPage> {
           stop.routes.sort((s1, s2) => s1.time.compareTo(s2.time));
         });
 
+        var lat = locModel.latitude;
+        var lng = locModel.longitude;
+        bool sortEnabled = lat != null && lng != null;
+
         var stopList = stops.values.toList(growable: false);
-        if (_sortEnabled) {
+        if (sortEnabled) {
           // Sort the stops by distance
           var distance = const Distance();
-          var myLoc = LatLng(_lat, _lng);
+          var myLoc = LatLng(lat, lng);
           stopList.sort((s1, s2) => distance
               .as(LengthUnit.Meter, myLoc, s1.loc)
               .compareTo(distance.as(LengthUnit.Meter, myLoc, s2.loc)));
@@ -203,7 +113,7 @@ class _ETAPageState extends State<ETAPage> {
 
         var textTheme = Theme.of(context).textTheme;
         return Column(children: [
-          if (!_sortEnabled)
+          if (!sortEnabled)
             Container(
                 padding: const EdgeInsets.all(12),
                 child: Text(
@@ -216,9 +126,9 @@ class _ETAPageState extends State<ETAPage> {
             itemBuilder: (context, index) {
               var stop = stopList[index];
               String? distance;
-              if (_sortEnabled) {
+              if (sortEnabled) {
                 var d = const Distance()
-                    .as(LengthUnit.Meter, stop.loc, LatLng(_lat, _lng))
+                    .as(LengthUnit.Meter, stop.loc, LatLng(lat, lng))
                     .ceil();
                 distance = d.toString() +
                     ' ' +
@@ -240,8 +150,8 @@ class _ETAPageState extends State<ETAPage> {
                               style: textTheme.bodyText1,
                               textAlign: TextAlign.start,
                             ),
-                            if (_sortEnabled) Expanded(child: Container()),
-                            if (_sortEnabled)
+                            if (sortEnabled) Expanded(child: Container()),
+                            if (sortEnabled)
                               Text(
                                 distance ?? '',
                                 style: textTheme.caption,
