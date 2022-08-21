@@ -150,13 +150,22 @@ class _RouteDetailState extends State<RouteDetail>
             ),
             layers: [
               TileLayerOptions(
+                // OSM humanitarian layer, which is more concise than default layer
+                /* TODO: It's suggested by osm that the url should be provided in a
+                 * way which allows switching without app update.
+                 * See https://operations.osmfoundation.org/policies/tiles/#requirements
+                 */
                 urlTemplate:
-                    "https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png",
-                subdomains: ['a', 'b', 'c'],
+                    "https://tile-{s}.openstreetmap.fr/hot/{z}/{x}/{y}.png",
+                subdomains: ['a', 'b'],
+                // Getting package name in flutter is inconvenience, so we
+                // hardcode the ua using app name here
+                userAgentPackageName: 'tracubus',
                 maxNativeZoom: 19,
                 maxZoom: 19,
                 minZoom: 14,
-                tileProvider: const NonCachingNetworkTileProvider(),
+                // TODO: the caching is not reliable; consider robust caching
+                tileProvider: NetworkTileProvider(),
               ),
               PolylineLayerOptions(
                 polylines: routePolyLines,
@@ -213,6 +222,25 @@ class _RouteDetailState extends State<RouteDetail>
                       ),
                     ),
                 ],
+              ),
+            ],
+            nonRotatedChildren: [
+              Align(
+                alignment: Alignment.bottomRight,
+                child: GestureDetector(
+                  child: Container(
+                    padding: const EdgeInsets.fromLTRB(5, 2, 5, 2),
+                    color: const Color.fromARGB(180, 255, 255, 255),
+                    // Corresponds to tile source
+                    child: Text(
+                      'tile © OpenStreetMap France, data © OpenStreetMap',
+                      style: Theme.of(context).textTheme.caption,
+                    ),
+                  ),
+                  onTap: () {
+                    // TODO: show attribution page
+                  },
+                ),
               ),
             ],
           ),
