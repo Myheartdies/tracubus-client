@@ -10,6 +10,7 @@ import 'package:scrollable_positioned_list/scrollable_positioned_list.dart';
 
 import 'businfo.dart';
 import 'businfo_model.dart';
+import 'tracubus_custom_icon_icons.dart';
 
 class RouteDetail extends StatefulWidget {
   final String routeId;
@@ -247,44 +248,100 @@ class _RouteDetailState extends State<RouteDetail>
         );
         details = Expanded(
           child: ScrollablePositionedList.builder(
-              itemCount: route.pieces.length,
-              itemScrollController: itemScrollController,
-              itemBuilder: (context, i) {
-                var stop = route.pieces[i];
-                var stopName =
-                    _busInfo.strings[localeKey]?.stationName[stop.stop] ?? '';
-                String? subtitle;
-                if (i == widget.startStopIdx) {
-                  subtitle = appLocalizations.from;
-                } else if (i == widget.endStopIdx) {
-                  subtitle = appLocalizations.to;
-                }
+            itemCount: route.pieces.length,
+            itemScrollController: itemScrollController,
+            itemBuilder: (context, i) {
+              var stop = route.pieces[i];
+              var stopName =
+                  _busInfo.strings[localeKey]?.stationName[stop.stop] ?? '';
+              String? subtitle;
+              if (i == widget.startStopIdx) {
+                subtitle = appLocalizations.from;
+              } else if (i == widget.endStopIdx) {
+                subtitle = appLocalizations.to;
+              }
 
-                return ListTile(
-                  selected: _selectedBusLocation == null
-                      ? false
-                      : _selectedBusLocation.stop + 1 == i,
-                  enabled: _selectedBusLocation == null
-                      ? true
-                      : _selectedBusLocation.stop + 1 <= i,
-                  // TODO: Change the icon
-                  leading: const Icon(Icons.circle_outlined),
-                  title: Text(stopName),
-                  subtitle: subtitle == null ? null : Text(subtitle),
-                  trailing: Text(
-                    _selectedBusLocation == null
-                        ? ''
-                        : BusInfoModel.timeString(stop.stop,
-                            _selectedBusLocation, _busInfo, appLocalizations),
+              var iconData = i == 0
+                  ? TracubusCustomIcon.top
+                  : (i == route.pieces.length - 1
+                      ? TracubusCustomIcon.bottom
+                      : TracubusCustomIcon.middle);
+              var theme = Theme.of(context);
+              Widget aBigWidget = Row(
+                children: [
+                  Expanded(
+                    child: Column(
+                      mainAxisAlignment: MainAxisAlignment.center,
+                      crossAxisAlignment: CrossAxisAlignment.start,
+                      children: [
+                        Text(stopName),
+                        if (subtitle != null)
+                          Text(
+                            subtitle,
+                            style: TextStyle(
+                              fontSize: theme.textTheme.caption?.fontSize,
+                            ),
+                          ),
+                      ],
+                    ),
                   ),
-                  onTap: () {
-                    if (allStops.containsKey(stop.stop)) {
-                      var p = allPts[allStops[stop.stop]!];
-                      _animatedMapMove(LatLng(p[0], p[1]), 17);
-                    }
-                  },
-                );
-              }),
+                  SizedBox(
+                    width: 80,
+                    child: Text(
+                      _selectedBusLocation == null
+                          ? ''
+                          : BusInfoModel.timeString(stop.stop,
+                              _selectedBusLocation, _busInfo, appLocalizations),
+                      style: TextStyle(
+                        fontSize: theme.textTheme.caption?.fontSize,
+                      ),
+                    ),
+                  ),
+                ],
+              );
+              if (_selectedBusLocation != null) {
+                if (_selectedBusLocation.stop + 1 == i) {
+                  aBigWidget = DefaultTextStyle(
+                    style: TextStyle(color: theme.primaryColor),
+                    child: aBigWidget,
+                  );
+                } else if (_selectedBusLocation.stop + 1 > i) {
+                  aBigWidget = DefaultTextStyle(
+                    style: const TextStyle(color: Colors.grey),
+                    child: aBigWidget,
+                  );
+                }
+              }
+
+              return SizedBox(
+                height: 64,
+                child: LayoutBuilder(
+                  builder: (context, constraints) => InkWell(
+                    onTap: () {
+                      if (allStops.containsKey(stop.stop)) {
+                        var p = allPts[allStops[stop.stop]!];
+                        _animatedMapMove(LatLng(p[0], p[1]), 17);
+                      }
+                    },
+                    child: Row(
+                      children: [
+                        Container(
+                          padding: const EdgeInsets.fromLTRB(16, 0, 24, 0),
+                          child: SizedBox(
+                            width: constraints.maxHeight / 512 * 232,
+                            child: Icon(iconData,
+                                size: constraints.maxHeight,
+                                color: Colors.grey),
+                          ),
+                        ),
+                        Expanded(child: aBigWidget),
+                      ],
+                    ),
+                  ),
+                ),
+              );
+            },
+          ),
         );
       }
 
