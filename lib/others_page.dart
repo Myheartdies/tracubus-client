@@ -84,22 +84,23 @@ class _OthersPageState extends State<OthersPage> {
                 );
               },
             ),
-            // const Divider(),
-            // Container(
-            //     padding: const EdgeInsets.all(12),
-            //     child: Text(
-            //       appLocalizations.about,
-            //       style: Theme.of(context).textTheme.caption,
-            //     )),
-            // ListTile(
-            //   title: Text(appLocalizations.aboutTeam),
-            //   onTap: () {
-            //     Navigator.push(
-            //       context,
-            //       MaterialPageRoute(builder: (context) => const AboutPage()),
-            //     );
-            //   },
-            // )
+            const Divider(),
+            Container(
+                padding: const EdgeInsets.all(12),
+                child: Text(
+                  appLocalizations.about,
+                  style: Theme.of(context).textTheme.caption,
+                )),
+            ListTile(
+              title: Text(appLocalizations.license),
+              onTap: () {
+                showLicensePage(context: context);
+                // Navigator.push(
+                //   context,
+                //   MaterialPageRoute(builder: (context) => const AboutPage()),
+                // );
+              },
+            )
           ],
         ));
   }

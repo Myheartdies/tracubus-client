@@ -14,6 +14,7 @@
     "locationPermissionErr": "程式未能獲取位置權限。請檢查您的系統權限設定。",
     "about": "關於",
     "aboutTeam": "關於我們",
+    "license": "許可",
 
     "busRoutes": "路線列表",
 
