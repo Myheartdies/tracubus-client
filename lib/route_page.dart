@@ -46,7 +46,7 @@ class _RoutePageState extends State<RoutePage> {
         return ListView.builder(
           itemCount: _routes.length * 2,
           itemBuilder: (context, i) {
-            if (i.isOdd) return const Divider();
+            if (i.isOdd) return const Divider(height: 8,);
             final index = i ~/ 2;
             var route = _routes.elementAt(index);
 
