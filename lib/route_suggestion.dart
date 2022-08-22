@@ -1,3 +1,5 @@
+import 'dart:async';
+
 import 'package:flutter/material.dart';
 import 'package:flutter_gen/gen_l10n/app_localizations.dart';
 import 'package:provider/provider.dart';
@@ -19,6 +21,16 @@ class RouteSuggest extends StatefulWidget {
 class _RouteSuggestState extends State<RouteSuggest> {
   String? _srcPlaceId, _destPlaceId;
   bool _fuzzyEnabled = false;
+  DateTime _utcNow = DateTime.now().toUtc();
+
+  @override
+  void initState() {
+    super.initState();
+
+    Timer.periodic(const Duration(seconds: 5), (timer) {
+      setState(() => _utcNow = DateTime.now().toUtc());
+    });
+  }
 
   @override
   Widget build(BuildContext context) {
@@ -215,6 +227,12 @@ class _RouteSuggestState extends State<RouteSuggest> {
                     route = searchResults[index];
                   }
                   return ListTile(
+                      contentPadding: const EdgeInsets.symmetric(horizontal: 8),
+                      horizontalTitleGap: 0,
+                      leading: BusInfoModel.inOperationPeriod(
+                              route.routeId, _utcNow, _busInfo)
+                          ? const Icon(Icons.check_circle_outline, color: Colors.grey)
+                          : const Icon(Icons.warning_amber_rounded, color: Colors.grey),
                       title: Text(route.routeId),
                       isThreeLine: true,
                       subtitle: Column(

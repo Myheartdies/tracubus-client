@@ -4,11 +4,9 @@ import 'package:flutter/material.dart';
 import 'package:flutter_gen/gen_l10n/app_localizations.dart';
 import 'package:provider/provider.dart';
 import 'package:latlong2/latlong.dart';
-import 'dart:math';
 
 import 'businfo_model.dart';
 import 'location_model.dart';
-import 'businfo.dart';
 import 'route_detail.dart';
 
 class ETAPage extends StatefulWidget {
@@ -19,15 +17,15 @@ class ETAPage extends StatefulWidget {
 }
 
 class _ETAPageState extends State<ETAPage> {
-  int _now = 0;
+  DateTime _utcNow = DateTime.now().toUtc();
 
   @override
   void initState() {
     super.initState();
 
-    setState(() => _now = DateTime.now().minute);
+    setState(() => _utcNow = DateTime.now().toUtc());
     Timer.periodic(const Duration(seconds: 5), (timer) {
-      setState(() => _now = DateTime.now().minute);
+      setState(() => _utcNow = DateTime.now().toUtc());
     });
   }
 
@@ -61,7 +59,8 @@ class _ETAPageState extends State<ETAPage> {
           return MapEntry(key, Stop(key, name, loc));
         });
 
-        // If a bus will pass the stop, add the route to it
+        // If a bus will pass the stop, and the stop is not the last stop
+        // in the route, then add the route to it
         var buses = busLocModel.busLocations;
         if (buses != null && buses.isNotEmpty) {
           for (var bus in buses) {
@@ -77,21 +76,38 @@ class _ETAPageState extends State<ETAPage> {
             });
           }
         }
-        // // For the first stops of each route, add the route to it
-        // for (var route in _busInfo.routes.entries) {
-        //   var firstStop = route.value.pieces[0].stop;
-        //   if (stops.containsKey(firstStop)) {
-        //     int time = calculateTimeForFirstStop(route.value, _now);
-        //     if (time >= 0) {
-        //       var routeName =
-        //           _busInfo.strings[localeKey]?.route[route.key]?.name ?? '';
-        //       stops[firstStop]!.routes.add(Route(route.key, routeName, time));
-        //     }
-        //   }
-        // }
+
+        // For each route, predict the next bus:
+        for (var route in _busInfo.routes.entries) {
+          // For this route, predict next starting time
+          var next = BusInfoModel.calculateTimeForNextBus(route.value, _utcNow);
+          if (next < 0) continue;
+          // After [next] seconds, a bus will start from its first stop.
+
+          var routeName =
+              _busInfo.strings[localeKey]?.route[route.key]?.name ?? '';
+          // For each stop, add this route, except the last stop
+          for (var i = 0; i < route.value.pieces.length - 1; i++) {
+            late int time;
+            if (i == 0) {
+              time = 0;
+            } else {
+              var _time = route.value.avgTime['0-$i'];
+              if (_time == null) continue;
+              time = _time;
+            }
+            time = time + next;
+            stops[route.value.pieces[i].stop]!
+                .routes
+                .add(Route(route.key, routeName, time));
+          }
+        }
+
         // Sort the routes by time
         stops.forEach((key, stop) {
           stop.routes.sort((s1, s2) => s1.time.compareTo(s2.time));
+          // Filter out results whose time is longer than an hour
+          stop.routes.removeWhere((route) => route.time > 3600);
         });
 
         var lat = locModel.latitude;
@@ -198,17 +214,6 @@ class _ETAPageState extends State<ETAPage> {
         ]);
       }),
     );
-  }
-
-  // TODO: Consider running time range?
-  int calculateTimeForFirstStop(BusRoute route, int nowMinute) {
-    int? time;
-    for (var de in route.departure) {
-      if (de < nowMinute) de = de + 60;
-      time ??= de - nowMinute;
-      time = min(time, de - nowMinute);
-    }
-    return time == null ? -2 : time * 60;
   }
 }
 

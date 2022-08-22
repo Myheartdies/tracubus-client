@@ -12,6 +12,7 @@ class BusRoute {
     this.maxLat,
     this.minLng,
     this.maxLng,
+    this.operation,
   );
 
   @JsonKey(required: true)
@@ -37,6 +38,9 @@ class BusRoute {
 
   @JsonKey(defaultValue: 0)
   double maxLng;
+
+  @JsonKey(required: true)
+  final OperationInfo operation;
 
   factory BusRoute.fromJson(Map<String, dynamic> json) =>
       _$BusRouteFromJson(json);
@@ -128,6 +132,25 @@ class LanguageString {
       _$LanguageStringFromJson(json);
 
   Map<String, dynamic> toJson() => _$LanguageStringToJson(this);
+}
+
+@JsonSerializable()
+class OperationInfo {
+  OperationInfo(this.period, this.departure, this.holiday,);
+
+  @JsonKey(required: true)
+  final List<String> period;
+
+  @JsonKey(required: true)
+  final List<String> departure;
+
+  @JsonKey(required: true)
+  final bool holiday;
+
+  factory OperationInfo.fromJson(Map<String, dynamic> json) =>
+      _$OperationInfoFromJson(json);
+
+  Map<String, dynamic> toJson() => _$OperationInfoToJson(this);
 }
 
 @JsonSerializable()

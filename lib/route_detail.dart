@@ -290,8 +290,10 @@ class _RouteDetailState extends State<RouteDetail>
                     child: Text(
                       _selectedBusLocation == null
                           ? ''
-                          : BusInfoModel.timeString(stop.stop,
-                              _selectedBusLocation, _busInfo, appLocalizations),
+                          : BusInfoModel.timeToString(
+                              BusInfoModel.estimatedTime(
+                                  stop.stop, _selectedBusLocation, _busInfo),
+                              appLocalizations),
                       style: TextStyle(
                         fontSize: theme.textTheme.caption?.fontSize,
                       ),

@@ -90,6 +90,15 @@ class BusInfoModel extends ChangeNotifier {
     }
 
     for (var route in busInfo.routes.values) {
+      if (route.operation.period.length != 2) return false;
+      for (var n in route.operation.period) {
+        if (!_validateHMString(n)) return false;
+      }
+      if (route.operation.departure.isEmpty) return false;
+      for (var n in route.operation.departure) {
+        if (int.tryParse(n) == null) return false;
+      }
+
       for (var stop in route.pieces) {
         if (!busInfo.stops.containsKey(stop.stop)) return false;
         for (var n in stop.segs) {
@@ -105,6 +114,16 @@ class BusInfoModel extends ChangeNotifier {
     return true;
   }
 
+  static bool _validateHMString(String str) {
+    var arr = str.split(':');
+    if (arr.length != 2) return false;
+    for (var num in arr) {
+      var n = int.tryParse(num);
+      if (n == null) return false;
+    }
+    return true;
+  }
+
   static String locale2Key(Locale locale) {
     return locale.languageCode +
         (locale.countryCode == null || locale.countryCode == ''
@@ -112,20 +131,15 @@ class BusInfoModel extends ChangeNotifier {
             : '-' + locale.countryCode!);
   }
 
-  static String timeString(String stopId, BusLocation bus, BusInfo busInfo,
-      AppLocalizations appLocalizations) {
-    int time = estimatedTime(stopId, bus, busInfo);
-    return timeToString(time, appLocalizations);
-  }
-
   /// returns the time left for the bus to reach this stop
-  /// -2: error, -1: passed
+  /// -1: passed, -2: error, -3: last stop
   static int estimatedTime(String stopId, BusLocation bus, BusInfo busInfo) {
     BusRoute? route = busInfo.routes[bus.route];
     if (route == null) return -2;
 
     int stopIdx = route.pieces.indexWhere((element) => element.stop == stopId);
     if (stopIdx == -1) return -2;
+    if (stopIdx == route.pieces.length - 1) return -3;
 
     int currentStop = bus.stop;
     if (stopIdx <= currentStop) return -1;
@@ -140,6 +154,83 @@ class BusInfoModel extends ChangeNotifier {
         return bus.remaining + avg;
       }
     }
+  }
+
+  /// Calculate how long until the next bus starts.
+  ///
+  /// Returns time in seconds.
+  /// If there is no more buses today, this will return a negative value.
+  static int calculateTimeForNextBus(BusRoute route, DateTime datetime) {
+    // Convert datetime to Hong Kong time in two steps:
+    // 1. Convert local time to utc
+    if (!datetime.isUtc) datetime = datetime.toUtc();
+    // 2. Convert utc to "Hong Kong time" by directly add 8 hours
+    // (This datetime is likely in broken state.)
+    var _datetime = datetime.add(const Duration(hours: 8));
+
+    // Check whether this route is in operation today
+    if (_isHoliday(datetime) != route.operation.holiday) return -1;
+
+    var timeStr = _datetime.hour.toString().padLeft(2, '0') +
+        ':' +
+        _datetime.minute.toString().padLeft(2, '0');
+
+    if (timeStr.compareTo(route.operation.period[1]) > 0) {
+      // No more buses today
+      return -1;
+    } else if (timeStr.compareTo(route.operation.period[0]) < 0) {
+      // First not started yet
+      var firstBusTime = route.operation.period[0].split(':');
+      var firstHour = int.tryParse(firstBusTime[0]);
+      var firstMinute = int.tryParse(firstBusTime[1]);
+      if (firstHour == null || firstMinute == null) return -1;
+      return ((firstHour - _datetime.hour) * 60 +
+              firstMinute -
+              _datetime.minute) *
+          60;
+    } else {
+      int? time;
+      for (var de in route.operation.departure) {
+        var minute = int.tryParse(de);
+        if (minute == null) return -1;
+        if (minute < _datetime.minute) minute = minute + 60;
+        time ??= minute - _datetime.minute;
+        time = min(time, minute - _datetime.minute);
+      }
+      return time == null ? -1 : time * 60;
+    }
+  }
+
+  /// Check whether the bus is in operation. Only consider starting time.
+  static bool inOperationPeriod(String routeId, DateTime datetime, BusInfo businfo) {
+    // Convert datetime to Hong Kong time in two steps:
+    // 1. Convert local time to utc
+    if (!datetime.isUtc) datetime = datetime.toUtc();
+    // 2. Convert utc to "Hong Kong time" by directly add 8 hours
+    // (This datetime is likely in broken state.)
+    var _datetime = datetime.add(const Duration(hours: 8));
+
+    var route = businfo.routes[routeId];
+    if (route == null) return false;
+
+    if (route.operation.holiday != _isHoliday(datetime)) return false;
+
+    // Then check period
+    var timeStr = _datetime.hour.toString().padLeft(2, '0') +
+        ':' +
+        _datetime.minute.toString().padLeft(2, '0');
+    if (timeStr.compareTo(route.operation.period[0]) < 0 ||
+        timeStr.compareTo(route.operation.period[1]) > 0) {
+      return false;
+    }
+
+    return true;
+  }
+
+  /// hkDateTime should be utc DateTime
+  static bool _isHoliday(DateTime utcDateTime) {
+    // TODO: Currently only check Sunday
+    return utcDateTime.add(const Duration(hours: 8)).weekday == 7;
   }
 
   static String timeToString(int time, AppLocalizations appLocalizations) {
