@@ -1,3 +1,4 @@
+import 'package:cached_network_image/cached_network_image.dart';
 import 'package:collection/collection.dart';
 import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
@@ -165,8 +166,7 @@ class _RouteDetailState extends State<RouteDetail>
                 maxNativeZoom: 19,
                 maxZoom: 19,
                 minZoom: 14,
-                // TODO: the caching is not reliable; consider robust caching
-                tileProvider: NetworkTileProvider(),
+                tileProvider: CustomTileProvider(),
               ),
               PolylineLayerOptions(
                 polylines: routePolyLines,
@@ -390,4 +390,10 @@ class _RouteDetailState extends State<RouteDetail>
 
     controller.forward();
   }
+}
+
+class CustomTileProvider extends TileProvider {
+  @override
+  ImageProvider getImage(Coords<num> coords, TileLayerOptions options) =>
+      CachedNetworkImageProvider(getTileUrl(coords, options), headers: headers);
 }
